@@ -10,10 +10,12 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TaskManagementPage } from '../pages/TaskManagementPage'
+import { useTaskStore } from '../store/task.store'
 
 describe('Task Management Integration', () => {
   beforeEach(() => {
-    // Reset store or use test wrapper
+    // Reset Zustand store before each test
+    useTaskStore.setState({ tasks: [] })
   })
 
   describe('User Journey: Complete Task Lifecycle', () => {

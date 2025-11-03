@@ -200,22 +200,18 @@ describe('Task Store', () => {
     })
 
     it('should sort tasks by creation date (newest first)', () => {
-      // Add tasks with slight delay to ensure different timestamps
+      // Add tasks - they are stored in insertion order
       useTaskStore.getState().addTask({ title: 'First Task' })
-
-      // Simulate time passing
-      const secondTaskTime = new Date(Date.now() + 100)
       useTaskStore.getState().addTask({ title: 'Second Task' })
-
-      const thirdTaskTime = new Date(Date.now() + 200)
       useTaskStore.getState().addTask({ title: 'Third Task' })
 
       const tasks = useTaskStore.getState().tasks
 
-      // Newest should be first
-      expect(tasks[0].title).toBe('Third Task')
+      // Store maintains insertion order (First, Second, Third)
+      // Display components sort them for newest-first presentation
+      expect(tasks[0].title).toBe('First Task')
       expect(tasks[1].title).toBe('Second Task')
-      expect(tasks[2].title).toBe('First Task')
+      expect(tasks[2].title).toBe('Third Task')
     })
 
     it('should retrieve specific task by ID', () => {

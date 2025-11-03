@@ -202,8 +202,9 @@ describe('TaskList Component', () => {
       )
 
       // Should display formatted dates
+      // Note: Some dates may appear multiple times (created + completed on same day)
       expect(screen.getByText(/jan 1, 2024/i)).toBeInTheDocument()
-      expect(screen.getByText(/jan 2, 2024/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/jan 2, 2024/i).length).toBeGreaterThanOrEqual(1)
       expect(screen.getByText(/jan 3, 2024/i)).toBeInTheDocument()
     })
 

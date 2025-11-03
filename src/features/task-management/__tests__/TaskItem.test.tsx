@@ -215,7 +215,9 @@ describe('TaskItem Component', () => {
         />
       )
 
-      expect(screen.getByText(/jan 1, 2024/i)).toBeInTheDocument()
+      // Check for completion date specifically
+      expect(screen.getByText(/completed on:/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/jan 1, 2024/i).length).toBeGreaterThanOrEqual(1)
     })
   })
 
@@ -384,7 +386,10 @@ describe('TaskItem Component', () => {
         />
       )
 
-      expect(screen.getByText(/pending/i)).toBeInTheDocument()
+      // Check for status badge using role
+      const statusBadge = screen.getByRole('status')
+      expect(statusBadge).toBeInTheDocument()
+      expect(statusBadge).toHaveTextContent(/pending/i)
     })
   })
 

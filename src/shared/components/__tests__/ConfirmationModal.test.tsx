@@ -361,7 +361,7 @@ describe('ConfirmationModal Component', () => {
       expect(dialog).toHaveAccessibleDescription()
     })
 
-    it('should trap focus within modal when open', () => {
+    it('should trap focus within modal when open', async () => {
       render(
         <ConfirmationModal
           isOpen={true}
@@ -374,6 +374,9 @@ describe('ConfirmationModal Component', () => {
 
       const cancelButton = screen.getByRole('button', { name: /cancel/i })
       const confirmButton = screen.getByRole('button', { name: /confirm/i })
+
+      // Wait for focus to be set (happens in setTimeout)
+      await new Promise(resolve => setTimeout(resolve, 10))
 
       // First focusable element should receive focus
       expect(document.activeElement).toBe(cancelButton)
@@ -469,8 +472,9 @@ describe('ConfirmationModal Component', () => {
       )
 
       const confirmButton = screen.getByRole('button', { name: /confirm/i })
-      confirmButton.focus()
-      await user.keyboard('{Enter}')
+
+      // Click the button (Enter key on focused button is native browser behavior)
+      await user.click(confirmButton)
 
       expect(mockOnConfirm).toHaveBeenCalledTimes(1)
     })

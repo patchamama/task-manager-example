@@ -2,8 +2,9 @@
  * TaskManagementPage Component
  * EPIC 1: Task Management Core
  * EPIC 4.1: Dark Mode
+ * EPIC 4.2: Responsive Design
  *
- * Main page integrating all task management features
+ * Main page integrating all task management features with mobile-first responsive layout
  */
 
 import React, { useState, useEffect } from 'react'
@@ -80,29 +81,30 @@ export const TaskManagementPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-4xl">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Task Manager</h1>
-          <div className="flex items-center gap-3">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">Task Manager</h1>
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <ThemeToggle />
             <button
               onClick={handleCreateTask}
-              className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+              className={`px-3 py-2 sm:px-4 sm:py-2 min-h-[44px] bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm sm:text-base font-medium whitespace-nowrap ${
                 showForm || editingTask ? 'invisible' : ''
               }`}
               aria-hidden={showForm || editingTask}
               tabIndex={showForm || editingTask ? -1 : 0}
             >
-              New Task
+              <span className="hidden sm:inline">New Task</span>
+              <span className="sm:hidden">New</span>
             </button>
           </div>
         </div>
 
         {/* Task Stats */}
         {tasks.length > 0 && (
-          <div className="text-gray-600 dark:text-gray-400">
+          <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             {completedCount} of {tasks.length} completed
           </div>
         )}
@@ -110,7 +112,7 @@ export const TaskManagementPage: React.FC = () => {
 
       {/* Task Form */}
       {(showForm || editingTask) && (
-        <div className="mb-8 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-colors">
+        <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-colors">
           <TaskForm
             key={editingTask ? editingTask.id : 'new-task'}
             task={editingTask || undefined}

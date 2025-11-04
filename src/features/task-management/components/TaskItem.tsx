@@ -3,6 +3,7 @@
  * EPIC 1: Task Management Core
  * EPIC 2: Task Organization
  * EPIC 3: Categories & Tags
+ * EPIC 4.2: Responsive Design
  *
  * User Story 1.4: Delete Task
  * User Story 1.5: Mark Task Complete
@@ -10,6 +11,7 @@
  * User Story 2.5: Add Due Dates
  * User Story 3.2: Assign Category to Task (display category badge)
  * User Story 3.4: Add Tags to Tasks (display tags)
+ * User Story 4.2: Mobile-optimized layout with touch-friendly buttons (44x44px min)
  */
 
 import React from 'react'
@@ -109,22 +111,22 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onTo
   return (
     <article
       aria-label={`Task: ${task.title}`}
-      className={`p-4 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg transition-colors ${isCompleted ? 'opacity-60' : ''}`}
+      className={`p-3 sm:p-4 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg transition-colors ${isCompleted ? 'opacity-60' : ''}`}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 sm:gap-4">
         {/* Checkbox */}
         <input
           type="checkbox"
           checked={isCompleted}
           onChange={() => onToggleComplete(task.id)}
           aria-label={`Mark ${task.title} as complete`}
-          className="mt-1 h-5 w-5 cursor-pointer focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+          className="mt-1 h-5 w-5 sm:h-6 sm:w-6 min-h-[20px] min-w-[20px] cursor-pointer focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
         />
 
         {/* Task Content */}
-        <div className="flex-1">
-          <div className="flex items-start justify-between">
-            <h3 className={`text-lg font-semibold text-gray-900 dark:text-gray-100 ${isCompleted ? 'line-through' : ''}`}>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2 flex-wrap sm:flex-nowrap">
+            <h3 className={`text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 break-words ${isCompleted ? 'line-through' : ''}`}>
               {task.title}
             </h3>
 
@@ -132,7 +134,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onTo
             <span
               role="status"
               aria-label={`Task status: ${isCompleted ? 'Completed' : 'Pending'}`}
-              className={`px-2 py-1 text-xs font-medium rounded-full ${
+              className={`flex-shrink-0 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
                 isCompleted
                   ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                   : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
@@ -143,7 +145,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onTo
           </div>
 
           {/* Description */}
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">
             {task.description || 'No description'}
           </p>
 
@@ -212,11 +214,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onTo
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => onEdit(task)}
               aria-label={`Edit ${task.title}`}
-              className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+              className="flex items-center justify-center sm:justify-start gap-1 px-3 py-2 sm:py-1 min-h-[44px] sm:min-h-[auto] text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
             >
               <svg
                 className="w-4 h-4"
@@ -237,7 +239,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onTo
             <button
               onClick={() => onDelete(task.id)}
               aria-label={`Delete ${task.title}`}
-              className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 transition-colors"
+              className="flex items-center justify-center sm:justify-start gap-1 px-3 py-2 sm:py-1 min-h-[44px] sm:min-h-[auto] text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 transition-colors"
             >
               <svg
                 className="w-4 h-4"

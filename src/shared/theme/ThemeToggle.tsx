@@ -1,8 +1,9 @@
 /**
- * Theme Toggle Component - EPIC 4.1
+ * Theme Toggle Component - EPIC 4.1, EPIC 4.2
  * User Story 4.1: Dark Mode
+ * User Story 4.2: Responsive Design (44x44px touch target)
  *
- * Button component for toggling between light and dark themes
+ * Button component for toggling between light and dark themes with mobile-friendly sizing
  */
 
 import React from 'react'
@@ -15,13 +16,13 @@ export const ThemeToggle: React.FC = () => {
     <button
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-      className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+      className="rounded-lg p-2 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-[auto] sm:min-w-[auto] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
       data-testid="theme-toggle"
     >
       {theme === 'light' ? (
         // Moon icon for dark mode
         <svg
-          className="w-5 h-5 text-gray-700"
+          className="w-5 h-5 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -37,7 +38,7 @@ export const ThemeToggle: React.FC = () => {
       ) : (
         // Sun icon for light mode
         <svg
-          className="w-5 h-5 text-yellow-400"
+          className="w-5 h-5 sm:w-5 sm:h-5 text-yellow-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

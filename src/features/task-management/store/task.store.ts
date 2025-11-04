@@ -633,16 +633,24 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       throw new Error('Category name must be unique')
     }
 
-    // Validate: Color is required and valid hex format
-    if (!dto.color || !/^#[0-9A-F]{6}$/i.test(dto.color)) {
-      throw new Error('Valid color hex code is required (e.g., #FF0000)')
+    // Validate: Color is required
+    if (!dto.color || dto.color.trim() === '') {
+      throw new Error('Category color is required')
     }
+
+    // Validate: Valid hex format
+    if (!/^#?[0-9A-F]{6}$/i.test(dto.color)) {
+      throw new Error('Category color must be a valid hex color')
+    }
+
+    // Normalize color: ensure it has # prefix and is lowercase
+    const normalizedColor = (dto.color.startsWith('#') ? dto.color : `#${dto.color}`).toLowerCase()
 
     const now = new Date()
     const newCategory: Category = {
       id: generateId(),
       name: dto.name.trim(),
-      color: dto.color.toLowerCase(),
+      color: normalizedColor,
       createdAt: now,
       updatedAt: now,
     }
@@ -674,9 +682,19 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
 
     // Validate color if provided
-    if (dto.color !== undefined && !/^#[0-9A-F]{6}$/i.test(dto.color)) {
-      throw new Error('Valid color hex code is required (e.g., #FF0000)')
+    if (dto.color !== undefined) {
+      if (dto.color.trim() === '') {
+        throw new Error('Category color is required')
+      }
+      if (!/^#?[0-9A-F]{6}$/i.test(dto.color)) {
+        throw new Error('Category color must be a valid hex color')
+      }
     }
+
+    // Normalize color if provided
+    const normalizedColor = dto.color
+      ? (dto.color.startsWith('#') ? dto.color : `#${dto.color}`).toLowerCase()
+      : undefined
 
     set((state) => ({
       categories: state.categories.map((c) =>
@@ -684,7 +702,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
           ? {
               ...c,
               ...(dto.name !== undefined && { name: dto.name.trim() }),
-              ...(dto.color !== undefined && { color: dto.color.toLowerCase() }),
+              ...(normalizedColor !== undefined && { color: normalizedColor }),
               updatedAt: new Date(),
             }
           : c
@@ -802,17 +820,22 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const normalizedTag = tag.trim().toLowerCase()
 
     if (!normalizedTag) {
-      throw new Error('Tag cannot be empty')
+      throw new Error('Tag name cannot be empty')
+    }
+
+    // Validate tag length (max 30 characters)
+    if (normalizedTag.length > 30) {
+      throw new Error('Tag name must not exceed 30 characters')
     }
 
     // Check if tag already exists on task
     if (task.tags.some((t) => t.toLowerCase() === normalizedTag)) {
-      throw new Error('Tag already exists on task')
+      throw new Error('Tag already exists')
     }
 
     // Validate max 10 tags per task
     if (task.tags.length >= 10) {
-      throw new Error('Maximum 10 tags per task allowed')
+      throw new Error('Maximum 10 tags per task')
     }
 
     set((state) => ({
@@ -866,7 +889,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const normalizedNew = newTag.trim().toLowerCase()
 
     if (!normalizedNew) {
-      throw new Error('New tag name cannot be empty')
+      throw new Error('Tag name cannot be empty')
     }
 
     // Get all tasks with the old tag

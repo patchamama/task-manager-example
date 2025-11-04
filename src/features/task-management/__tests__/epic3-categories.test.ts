@@ -47,13 +47,8 @@ interface TaskWithCategory extends CreateTaskDto {
 describe('User Story 3.1: Create Categories', () => {
   beforeEach(() => {
     // Reset store state before each test
-    useTaskStore.setState({
-      tasks: [],
-      currentFilter: 'all' as any,
-      sortBy: 'dateCreated' as any,
-      sortDirection: 'desc' as any,
-      searchQuery: '',
-    })
+    // @ts-expect-error - resetStore is a test utility
+    useTaskStore.getState().resetStore()
   })
 
   describe('Store - Category CRUD Operations', () => {
@@ -337,13 +332,8 @@ describe('User Story 3.1: Create Categories', () => {
 
 describe('User Story 3.2: Assign Category to Task', () => {
   beforeEach(() => {
-    useTaskStore.setState({
-      tasks: [],
-      currentFilter: 'all' as any,
-      sortBy: 'dateCreated' as any,
-      sortDirection: 'desc' as any,
-      searchQuery: '',
-    })
+    // @ts-expect-error - resetStore is a test utility
+    useTaskStore.getState().resetStore()
   })
 
   describe('Store - Category Assignment', () => {
@@ -601,13 +591,8 @@ describe('User Story 3.2: Assign Category to Task', () => {
 
 describe('User Story 3.3: Filter by Category', () => {
   beforeEach(() => {
-    useTaskStore.setState({
-      tasks: [],
-      currentFilter: 'all' as any,
-      sortBy: 'dateCreated' as any,
-      sortDirection: 'desc' as any,
-      searchQuery: '',
-    })
+    // @ts-expect-error - resetStore is a test utility
+    useTaskStore.getState().resetStore()
   })
 
   describe('Store - Category Filtering', () => {

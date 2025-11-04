@@ -887,6 +887,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   mergeTag: (sourceTags: string[], targetTag: string) => {
+    // Validate inputs
+    if (sourceTags.length === 0) {
+      throw new Error('Must provide at least one tag to merge')
+    }
+
     const normalizedTarget = targetTag.trim().toLowerCase()
     const normalizedSources = sourceTags.map((t) => t.trim().toLowerCase())
 
@@ -905,14 +910,16 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
         const hasTarget = t.tags.some((tag) => tag.toLowerCase() === normalizedTarget)
 
+        const targetTagNormalized = targetTag.trim().toLowerCase()
+
         return {
           ...t,
-          tags: hasTarget ? filteredTags : [...filteredTags, targetTag.trim()],
+          tags: hasTarget ? filteredTags : [...filteredTags, targetTagNormalized],
         }
       }),
       tagFilters: state.tagFilters
         .filter((f) => !normalizedSources.includes(f.toLowerCase()))
-        .concat(state.tagFilters.includes(targetTag.trim()) ? [] : [targetTag.trim()]),
+        .concat(state.tagFilters.some((f) => f.toLowerCase() === normalizedTarget) ? [] : [targetTag.trim().toLowerCase()]),
     }))
   },
 

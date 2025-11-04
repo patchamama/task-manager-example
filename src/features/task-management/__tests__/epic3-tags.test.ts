@@ -19,13 +19,8 @@ interface TaskWithTags extends CreateTaskDto {
 describe('User Story 3.4: Add Tags to Tasks', () => {
   beforeEach(() => {
     // Reset store state before each test
-    useTaskStore.setState({
-      tasks: [],
-      currentFilter: 'all' as any,
-      sortBy: 'dateCreated' as any,
-      sortDirection: 'desc' as any,
-      searchQuery: '',
-    })
+    // @ts-expect-error - resetStore is a test utility
+    useTaskStore.getState().resetStore()
   })
 
   describe('Store - Tag Operations', () => {
@@ -395,13 +390,8 @@ describe('User Story 3.4: Add Tags to Tasks', () => {
 
 describe('User Story 3.5: Tag Management', () => {
   beforeEach(() => {
-    useTaskStore.setState({
-      tasks: [],
-      currentFilter: 'all' as any,
-      sortBy: 'dateCreated' as any,
-      sortDirection: 'desc' as any,
-      searchQuery: '',
-    })
+    // @ts-expect-error - resetStore is a test utility
+    useTaskStore.getState().resetStore()
   })
 
   describe('Store - Rename Tag', () => {
@@ -540,8 +530,8 @@ describe('User Story 3.5: Tag Management', () => {
       // @ts-expect-error - tags parameter not supported yet
       useTaskStore.getState().addTask({ title: 'Task 3', tags: ['urgent', 'bug'] })
 
-      // @ts-expect-error - mergeTags action doesn't exist yet
-      useTaskStore.getState().mergeTags(['urgent', 'high-priority'], 'critical')
+      // @ts-expect-error - mergeTag action doesn't exist yet
+      useTaskStore.getState().mergeTag(['urgent', 'high-priority'], 'critical')
 
       const tasks = useTaskStore.getState().tasks
 
@@ -557,8 +547,8 @@ describe('User Story 3.5: Tag Management', () => {
       // @ts-expect-error - tags parameter not supported yet
       useTaskStore.getState().addTask({ title: 'Task 1', tags: ['urgent', 'important', 'critical'] })
 
-      // @ts-expect-error - mergeTags action doesn't exist yet
-      useTaskStore.getState().mergeTags(['urgent', 'important', 'critical'], 'high-priority')
+      // @ts-expect-error - mergeTag action doesn't exist yet
+      useTaskStore.getState().mergeTag(['urgent', 'important', 'critical'], 'high-priority')
 
       const task = useTaskStore.getState().tasks[0]
 
@@ -570,8 +560,8 @@ describe('User Story 3.5: Tag Management', () => {
       // @ts-expect-error - tags parameter not supported yet
       useTaskStore.getState().addTask({ title: 'Task 1', tags: ['urgent', 'critical'] })
 
-      // @ts-expect-error - mergeTags action doesn't exist yet
-      useTaskStore.getState().mergeTags(['urgent'], 'critical')
+      // @ts-expect-error - mergeTag action doesn't exist yet
+      useTaskStore.getState().mergeTag(['urgent'], 'critical')
 
       const task = useTaskStore.getState().tasks[0]
 
@@ -584,15 +574,15 @@ describe('User Story 3.5: Tag Management', () => {
       useTaskStore.getState().addTask({ title: 'Task 1', tags: ['urgent'] })
 
       expect(() => {
-        // @ts-expect-error - mergeTags action doesn't exist yet
-        useTaskStore.getState().mergeTags(['urgent'], '')
+        // @ts-expect-error - mergeTag action doesn't exist yet
+        useTaskStore.getState().mergeTag(['urgent'], '')
       }).toThrow('Target tag name cannot be empty')
     })
 
     it('should throw error when merging empty tag list', () => {
       expect(() => {
-        // @ts-expect-error - mergeTags action doesn't exist yet
-        useTaskStore.getState().mergeTags([], 'critical')
+        // @ts-expect-error - mergeTag action doesn't exist yet
+        useTaskStore.getState().mergeTag([], 'critical')
       }).toThrow('Must provide at least one tag to merge')
     })
 
@@ -600,8 +590,8 @@ describe('User Story 3.5: Tag Management', () => {
       // @ts-expect-error - tags parameter not supported yet
       useTaskStore.getState().addTask({ title: 'Task 1', tags: ['urgent'] })
 
-      // @ts-expect-error - mergeTags action doesn't exist yet
-      useTaskStore.getState().mergeTags(['urgent'], '  CRITICAL  ')
+      // @ts-expect-error - mergeTag action doesn't exist yet
+      useTaskStore.getState().mergeTag(['urgent'], '  CRITICAL  ')
 
       const task = useTaskStore.getState().tasks[0]
 
@@ -623,8 +613,8 @@ describe('User Story 3.5: Tag Management', () => {
       const tagsWithCount = useTaskStore.getState().getTagsWithCount()
 
       expect(tagsWithCount).toEqual([
+        { tag: 'bug', count: 2 }, // Alphabetically before 'urgent'
         { tag: 'urgent', count: 2 },
-        { tag: 'bug', count: 2 },
         { tag: 'frontend', count: 1 },
       ])
     })

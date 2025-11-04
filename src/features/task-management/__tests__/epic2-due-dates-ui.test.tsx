@@ -18,6 +18,7 @@ import { TaskStatus, type Task } from '../types/task.types'
 
 // Extended Task type with due date
 type TaskWithDueDate = Task & {
+        priority: 'medium' as any,
   dueDate: Date | null
 }
 
@@ -89,6 +90,7 @@ describe('User Story 2.5: Due Dates UI', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Task with due date',
+        priority: 'medium' as any,
           dueDate: expect.any(Date),
         })
       )
@@ -107,6 +109,7 @@ describe('User Story 2.5: Due Dates UI', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Task without due date',
+        priority: 'medium' as any,
           dueDate: null,
         })
       )
@@ -142,6 +145,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Existing Task',
         description: 'Description',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: new Date('2024-01-20'),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -211,6 +215,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Task with due date',
         description: 'Description',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: new Date('2024-01-20'),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -236,6 +241,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Task without due date',
         description: 'Description',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -261,6 +267,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Overdue task',
         description: 'Description',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: new Date('2024-01-10'), // Past date
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -287,6 +294,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Overdue task',
         description: 'Description',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: new Date('2024-01-10'),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -312,6 +320,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Completed overdue task',
         description: 'Description',
         status: TaskStatus.COMPLETED,
+        priority: 'medium' as any,
         dueDate: new Date('2024-01-10'),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -339,6 +348,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Task due tomorrow',
         description: 'Description',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: tomorrow,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -365,6 +375,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Task due today',
         description: 'Description',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: today,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -390,6 +401,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Task with due date',
         description: 'Description',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: new Date('2024-01-20'),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -418,6 +430,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Task A',
         description: 'Due later',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: new Date('2024-01-25'),
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
@@ -428,6 +441,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Task B',
         description: 'Due soon',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: new Date('2024-01-18'),
         createdAt: new Date('2024-01-02'),
         updatedAt: new Date('2024-01-02'),
@@ -438,6 +452,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Task C',
         description: 'No due date',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: null,
         createdAt: new Date('2024-01-03'),
         updatedAt: new Date('2024-01-03'),
@@ -492,6 +507,7 @@ describe('User Story 2.5: Due Dates UI', () => {
           title: 'Overdue 1',
           description: '',
           status: TaskStatus.PENDING,
+        priority: 'medium' as any,
           dueDate: new Date('2024-01-10'),
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -502,6 +518,7 @@ describe('User Story 2.5: Due Dates UI', () => {
           title: 'Overdue 2',
           description: '',
           status: TaskStatus.PENDING,
+        priority: 'medium' as any,
           dueDate: new Date('2024-01-12'),
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -522,6 +539,7 @@ describe('User Story 2.5: Due Dates UI', () => {
           title: 'Future Task',
           description: '',
           status: TaskStatus.PENDING,
+        priority: 'medium' as any,
           dueDate: new Date('2024-01-20'),
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -557,6 +575,7 @@ describe('User Story 2.5: Due Dates UI', () => {
         title: 'Overdue task',
         description: '',
         status: TaskStatus.PENDING,
+        priority: 'medium' as any,
         dueDate: new Date('2024-01-10'),
         createdAt: new Date(),
         updatedAt: new Date(),

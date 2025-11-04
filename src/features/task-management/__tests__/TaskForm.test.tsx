@@ -430,6 +430,8 @@ describe('TaskForm Component', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         title: 'New Title',
         description: 'New Description',
+        priority: 'medium',
+        dueDate: null,
       })
     })
 
@@ -453,6 +455,8 @@ describe('TaskForm Component', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         title: 'Only Title Changed',
         description: 'Existing Description',
+        priority: 'medium',
+        dueDate: null,
       })
     })
 
@@ -476,6 +480,8 @@ describe('TaskForm Component', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         title: 'Existing Task',
         description: 'Only Description Changed',
+        priority: 'medium',
+        dueDate: null,
       })
     })
 

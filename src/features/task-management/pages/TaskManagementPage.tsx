@@ -1,6 +1,7 @@
 /**
  * TaskManagementPage Component
  * EPIC 1: Task Management Core
+ * EPIC 4.1: Dark Mode
  *
  * Main page integrating all task management features
  */
@@ -10,6 +11,7 @@ import { useTaskStore } from '../store/task.store'
 import { TaskForm } from '../components/TaskForm'
 import { TaskList } from '../components/TaskList'
 import { ConfirmationModal } from '../../../shared/components/ConfirmationModal'
+import { ThemeToggle } from '../../../shared/theme'
 import type { Task, CreateTaskDto } from '../types/task.types'
 
 export const TaskManagementPage: React.FC = () => {
@@ -82,22 +84,25 @@ export const TaskManagementPage: React.FC = () => {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">Task Manager</h1>
-          <button
-            onClick={handleCreateTask}
-            className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              showForm || editingTask ? 'invisible' : ''
-            }`}
-            aria-hidden={showForm || editingTask}
-            tabIndex={showForm || editingTask ? -1 : 0}
-          >
-            New Task
-          </button>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Task Manager</h1>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <button
+              onClick={handleCreateTask}
+              className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                showForm || editingTask ? 'invisible' : ''
+              }`}
+              aria-hidden={showForm || editingTask}
+              tabIndex={showForm || editingTask ? -1 : 0}
+            >
+              New Task
+            </button>
+          </div>
         </div>
 
         {/* Task Stats */}
         {tasks.length > 0 && (
-          <div className="text-gray-600">
+          <div className="text-gray-600 dark:text-gray-400">
             {completedCount} of {tasks.length} completed
           </div>
         )}
@@ -105,7 +110,7 @@ export const TaskManagementPage: React.FC = () => {
 
       {/* Task Form */}
       {(showForm || editingTask) && (
-        <div className="mb-8 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div className="mb-8 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-colors">
           <TaskForm
             key={editingTask ? editingTask.id : 'new-task'}
             task={editingTask || undefined}

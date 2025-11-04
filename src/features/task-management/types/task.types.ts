@@ -2,6 +2,7 @@
  * Task Management - Type Definitions
  * EPIC 1: Task Management Core
  * EPIC 2: Task Organization
+ * EPIC 3: Categories & Tags
  */
 
 /**
@@ -55,8 +56,38 @@ export enum TaskSortDirection {
 }
 
 /**
+ * Category interface
+ * User Story 3.1: Create Categories
+ */
+export interface Category {
+  id: string
+  name: string
+  color: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+/**
+ * Create Category DTO
+ * User Story 3.1: Create Categories
+ */
+export interface CreateCategoryDto {
+  name: string
+  color: string
+}
+
+/**
+ * Update Category DTO
+ * User Story 3.1: Create Categories
+ */
+export interface UpdateCategoryDto {
+  name?: string
+  color?: string
+}
+
+/**
  * Core Task interface
- * User Stories: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.5
+ * User Stories: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.5, 3.2, 3.4
  */
 export interface Task {
   id: string
@@ -68,6 +99,8 @@ export interface Task {
   createdAt: Date
   updatedAt: Date
   completedAt: Date | null
+  categoryId: string | null // User Story 3.2: Assign Category to Task
+  tags: string[] // User Story 3.4: Add Tags to Tasks
 }
 
 /**
@@ -75,12 +108,16 @@ export interface Task {
  * User Story 1.1: Create Task
  * User Story 2.1: Add Task Priority
  * User Story 2.5: Add Due Dates
+ * User Story 3.2: Assign Category to Task
+ * User Story 3.4: Add Tags to Tasks
  */
 export interface CreateTaskDto {
   title: string
   description?: string
   priority?: TaskPriority
   dueDate?: Date | null
+  categoryId?: string | null
+  tags?: string[]
 }
 
 /**
@@ -98,7 +135,10 @@ export interface UpdateTaskDto {
  */
 export interface TaskState {
   tasks: Task[]
+  categories: Category[]
   currentFilter: TaskFilter
+  categoryFilters: string[]
+  tagFilters: string[]
   sortBy: TaskSortBy
   sortDirection: TaskSortDirection
   searchQuery: string
@@ -150,4 +190,33 @@ export interface TaskState {
   getFilteredAndSearchedTasks: () => Task[]
   getSearchedAndSortedTasks: () => Task[]
   getFilteredSearchedAndSortedTasks: () => Task[]
+
+  // EPIC 3 Category Actions
+  addCategory: (dto: CreateCategoryDto) => void
+  updateCategory: (id: string, dto: UpdateCategoryDto) => void
+  deleteCategory: (id: string) => void
+  getCategoryById: (id: string) => Category | undefined
+  getAllCategories: () => Category[]
+  getCategoryCount: () => number
+  getCategoryTaskCount: (categoryId: string) => number
+  assignCategoryToTask: (taskId: string, categoryId: string | null) => void
+  getTasksByCategory: (categoryId: string | null) => Task[]
+  getUncategorizedTasks: () => Task[]
+  setCategoryFilter: (categoryIds: string[]) => void
+  clearCategoryFilter: () => void
+  getFilteredTasksByCategory: () => Task[]
+
+  // EPIC 3 Tag Actions
+  addTagToTask: (taskId: string, tag: string) => void
+  removeTagFromTask: (taskId: string, tag: string) => void
+  removeTag: (tag: string) => void
+  renameTag: (oldTag: string, newTag: string) => void
+  mergeTag: (sourceTags: string[], targetTag: string) => void
+  getAllTags: () => string[]
+  getTagCount: (tag: string) => number
+  getTasksByTag: (tag: string) => Task[]
+  getTagsWithCount: () => Array<{ tag: string; count: number }>
+  setTagFilter: (tags: string[]) => void
+  clearTagFilter: () => void
+  getFilteredTasksByTag: () => Task[]
 }

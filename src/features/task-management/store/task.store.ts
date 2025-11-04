@@ -2,12 +2,13 @@
  * Task Store
  * EPIC 1: Task Management Core
  * EPIC 2: Task Organization
+ * EPIC 3: Categories & Tags
  *
  * Zustand store for task state management
  */
 
 import { create } from 'zustand'
-import type { TaskState, CreateTaskDto, UpdateTaskDto, Task } from '../types/task.types'
+import type { TaskState, CreateTaskDto, UpdateTaskDto, Task, Category, CreateCategoryDto, UpdateCategoryDto } from '../types/task.types'
 import { TaskStatus, TaskPriority, TaskFilter, TaskSortBy, TaskSortDirection } from '../types/task.types'
 
 /**
@@ -77,7 +78,10 @@ const loadSortPreferenceFromStorage = (): { sortBy: TaskSortBy; sortDirection: T
 
 const initialState = {
   tasks: [],
+  categories: [],
   currentFilter: TaskFilter.ALL,
+  categoryFilters: [],
+  tagFilters: [],
   sortBy: TaskSortBy.DATE_CREATED,
   sortDirection: TaskSortDirection.DESC,
   searchQuery: '',
@@ -96,6 +100,19 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       validateDueDate(dto.dueDate)
     }
 
+    // Validate category if provided
+    if (dto.categoryId) {
+      const category = get().getCategoryById(dto.categoryId)
+      if (!category) {
+        throw new Error('Category not found')
+      }
+    }
+
+    // Validate tags if provided
+    if (dto.tags && dto.tags.length > 10) {
+      throw new Error('Maximum 10 tags per task allowed')
+    }
+
     const now = new Date()
     const newTask: Task = {
       id: generateId(),
@@ -104,6 +121,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       status: TaskStatus.PENDING,
       priority: dto.priority || TaskPriority.MEDIUM,
       dueDate: dto.dueDate || null,
+      categoryId: dto.categoryId || null, // EPIC 3: Support category on creation
+      tags: dto.tags || [], // EPIC 3: Support tags on creation
       createdAt: now,
       updatedAt: now,
       completedAt: null,
@@ -592,6 +611,378 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     })
 
     return sorted
+  },
+
+  // EPIC 3: Category Actions
+  addCategory: (dto: CreateCategoryDto) => {
+    const { categories } = get()
+
+    // Validate: Max 20 categories
+    if (categories.length >= 20) {
+      throw new Error('Maximum 20 categories allowed')
+    }
+
+    // Validate: Name is required
+    if (!dto.name || dto.name.trim() === '') {
+      throw new Error('Category name is required')
+    }
+
+    // Validate: Unique name
+    const normalizedName = dto.name.trim().toLowerCase()
+    if (categories.some((c) => c.name.toLowerCase() === normalizedName)) {
+      throw new Error('Category name must be unique')
+    }
+
+    // Validate: Color is required and valid hex format
+    if (!dto.color || !/^#[0-9A-F]{6}$/i.test(dto.color)) {
+      throw new Error('Valid color hex code is required (e.g., #FF0000)')
+    }
+
+    const now = new Date()
+    const newCategory: Category = {
+      id: generateId(),
+      name: dto.name.trim(),
+      color: dto.color.toLowerCase(),
+      createdAt: now,
+      updatedAt: now,
+    }
+
+    set((state) => ({
+      categories: [...state.categories, newCategory],
+    }))
+  },
+
+  updateCategory: (id: string, dto: UpdateCategoryDto) => {
+    const { categories } = get()
+    const category = categories.find((c) => c.id === id)
+
+    if (!category) {
+      throw new Error('Category not found')
+    }
+
+    // Validate name if provided
+    if (dto.name !== undefined) {
+      if (dto.name.trim() === '') {
+        throw new Error('Category name cannot be empty')
+      }
+
+      // Check uniqueness (excluding current category)
+      const normalizedName = dto.name.trim().toLowerCase()
+      if (categories.some((c) => c.id !== id && c.name.toLowerCase() === normalizedName)) {
+        throw new Error('Category name must be unique')
+      }
+    }
+
+    // Validate color if provided
+    if (dto.color !== undefined && !/^#[0-9A-F]{6}$/i.test(dto.color)) {
+      throw new Error('Valid color hex code is required (e.g., #FF0000)')
+    }
+
+    set((state) => ({
+      categories: state.categories.map((c) =>
+        c.id === id
+          ? {
+              ...c,
+              ...(dto.name !== undefined && { name: dto.name.trim() }),
+              ...(dto.color !== undefined && { color: dto.color.toLowerCase() }),
+              updatedAt: new Date(),
+            }
+          : c
+      ),
+    }))
+  },
+
+  deleteCategory: (id: string) => {
+    const { categories } = get()
+    const category = categories.find((c) => c.id === id)
+
+    if (!category) {
+      throw new Error('Category not found')
+    }
+
+    // Remove category and unassign from all tasks
+    set((state) => ({
+      categories: state.categories.filter((c) => c.id !== id),
+      tasks: state.tasks.map((t) => (t.categoryId === id ? { ...t, categoryId: null } : t)),
+      categoryFilters: state.categoryFilters.filter((f) => f !== id),
+    }))
+  },
+
+  getCategoryById: (id: string) => {
+    return get().categories.find((c) => c.id === id)
+  },
+
+  getAllCategories: () => {
+    return get().categories
+  },
+
+  getCategoryCount: () => {
+    return get().categories.length
+  },
+
+  getCategoryTaskCount: (categoryId: string) => {
+    return get().tasks.filter((t) => t.categoryId === categoryId).length
+  },
+
+  assignCategoryToTask: (taskId: string, categoryId: string | null) => {
+    const task = get().getTaskById(taskId)
+    if (!task) {
+      throw new Error('Task not found')
+    }
+
+    // Validate category exists if not null
+    if (categoryId !== null) {
+      const category = get().getCategoryById(categoryId)
+      if (!category) {
+        throw new Error('Category not found')
+      }
+    }
+
+    set((state) => ({
+      tasks: state.tasks.map((t) =>
+        t.id === taskId
+          ? {
+              ...t,
+              categoryId,
+              updatedAt: new Date(),
+            }
+          : t
+      ),
+    }))
+  },
+
+  getTasksByCategory: (categoryId: string | null) => {
+    return get().tasks.filter((t) => t.categoryId === categoryId)
+  },
+
+  getUncategorizedTasks: () => {
+    return get().tasks.filter((t) => t.categoryId === null)
+  },
+
+  setCategoryFilter: (categoryIds: string[]) => {
+    set({ categoryFilters: categoryIds })
+  },
+
+  clearCategoryFilter: () => {
+    set({ categoryFilters: [] })
+  },
+
+  getFilteredTasksByCategory: () => {
+    const { tasks, categoryFilters } = get()
+
+    if (categoryFilters.length === 0) {
+      return tasks
+    }
+
+    // Handle 'uncategorized' filter
+    if (categoryFilters.includes('uncategorized')) {
+      const categorizedTasks = tasks.filter((t) => {
+        // Include tasks with selected categories (excluding 'uncategorized')
+        const selectedCategories = categoryFilters.filter((f) => f !== 'uncategorized')
+        return selectedCategories.includes(t.categoryId || '')
+      })
+
+      const uncategorizedTasks = tasks.filter((t) => t.categoryId === null)
+
+      // Combine and deduplicate
+      const combined = [...categorizedTasks, ...uncategorizedTasks]
+      return Array.from(new Set(combined.map((t) => t.id))).map((id) => combined.find((t) => t.id === id)!)
+    }
+
+    return tasks.filter((t) => categoryFilters.includes(t.categoryId || ''))
+  },
+
+  // EPIC 3: Tag Actions
+  addTagToTask: (taskId: string, tag: string) => {
+    const task = get().getTaskById(taskId)
+    if (!task) {
+      throw new Error('Task not found')
+    }
+
+    const normalizedTag = tag.trim().toLowerCase()
+
+    if (!normalizedTag) {
+      throw new Error('Tag cannot be empty')
+    }
+
+    // Check if tag already exists on task
+    if (task.tags.some((t) => t.toLowerCase() === normalizedTag)) {
+      throw new Error('Tag already exists on task')
+    }
+
+    // Validate max 10 tags per task
+    if (task.tags.length >= 10) {
+      throw new Error('Maximum 10 tags per task allowed')
+    }
+
+    set((state) => ({
+      tasks: state.tasks.map((t) =>
+        t.id === taskId
+          ? {
+              ...t,
+              tags: [...t.tags, tag.trim()],
+              updatedAt: new Date(),
+            }
+          : t
+      ),
+    }))
+  },
+
+  removeTagFromTask: (taskId: string, tag: string) => {
+    const task = get().getTaskById(taskId)
+    if (!task) {
+      throw new Error('Task not found')
+    }
+
+    const normalizedTag = tag.trim().toLowerCase()
+
+    set((state) => ({
+      tasks: state.tasks.map((t) =>
+        t.id === taskId
+          ? {
+              ...t,
+              tags: t.tags.filter((existingTag) => existingTag.toLowerCase() !== normalizedTag),
+              updatedAt: new Date(),
+            }
+          : t
+      ),
+    }))
+  },
+
+  removeTag: (tag: string) => {
+    const normalizedTag = tag.trim().toLowerCase()
+
+    set((state) => ({
+      tasks: state.tasks.map((t) => ({
+        ...t,
+        tags: t.tags.filter((existingTag) => existingTag.toLowerCase() !== normalizedTag),
+      })),
+      tagFilters: state.tagFilters.filter((f) => f.toLowerCase() !== normalizedTag),
+    }))
+  },
+
+  renameTag: (oldTag: string, newTag: string) => {
+    const normalizedOld = oldTag.trim().toLowerCase()
+    const normalizedNew = newTag.trim().toLowerCase()
+
+    if (!normalizedNew) {
+      throw new Error('New tag name cannot be empty')
+    }
+
+    // Get all tasks with the old tag
+    const { tasks } = get()
+    const affectedTasks = tasks.filter((t) => t.tags.some((tag) => tag.toLowerCase() === normalizedOld))
+
+    if (affectedTasks.length === 0) {
+      throw new Error('Tag not found')
+    }
+
+    set((state) => ({
+      tasks: state.tasks.map((t) => ({
+        ...t,
+        tags: t.tags.map((tag) => (tag.toLowerCase() === normalizedOld ? newTag.trim() : tag)),
+      })),
+      tagFilters: state.tagFilters.map((f) => (f.toLowerCase() === normalizedOld ? newTag.trim() : f)),
+    }))
+  },
+
+  mergeTag: (sourceTags: string[], targetTag: string) => {
+    const normalizedTarget = targetTag.trim().toLowerCase()
+    const normalizedSources = sourceTags.map((t) => t.trim().toLowerCase())
+
+    if (!normalizedTarget) {
+      throw new Error('Target tag name cannot be empty')
+    }
+
+    set((state) => ({
+      tasks: state.tasks.map((t) => {
+        const hasSources = t.tags.some((tag) => normalizedSources.includes(tag.toLowerCase()))
+
+        if (!hasSources) return t
+
+        // Remove source tags and add target tag if not present
+        const filteredTags = t.tags.filter((tag) => !normalizedSources.includes(tag.toLowerCase()))
+
+        const hasTarget = t.tags.some((tag) => tag.toLowerCase() === normalizedTarget)
+
+        return {
+          ...t,
+          tags: hasTarget ? filteredTags : [...filteredTags, targetTag.trim()],
+        }
+      }),
+      tagFilters: state.tagFilters
+        .filter((f) => !normalizedSources.includes(f.toLowerCase()))
+        .concat(state.tagFilters.includes(targetTag.trim()) ? [] : [targetTag.trim()]),
+    }))
+  },
+
+  getAllTags: () => {
+    const { tasks } = get()
+    const allTags = tasks.flatMap((t) => t.tags)
+    // Return unique tags (case-insensitive)
+    const uniqueTags: string[] = []
+    const seen = new Set<string>()
+
+    for (const tag of allTags) {
+      const normalized = tag.toLowerCase()
+      if (!seen.has(normalized)) {
+        seen.add(normalized)
+        uniqueTags.push(tag)
+      }
+    }
+
+    return uniqueTags.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+  },
+
+  getTagCount: (tag: string) => {
+    const normalizedTag = tag.trim().toLowerCase()
+    return get().tasks.filter((t) => t.tags.some((existingTag) => existingTag.toLowerCase() === normalizedTag)).length
+  },
+
+  getTasksByTag: (tag: string) => {
+    const normalizedTag = tag.trim().toLowerCase()
+    return get().tasks.filter((t) => t.tags.some((existingTag) => existingTag.toLowerCase() === normalizedTag))
+  },
+
+  getTagsWithCount: () => {
+    const allTags = get().getAllTags()
+
+    const tagsWithCount = allTags.map((tag) => ({
+      tag,
+      count: get().getTagCount(tag),
+    }))
+
+    // Sort by count descending, then by tag name ascending
+    return tagsWithCount.sort((a, b) => {
+      if (b.count !== a.count) {
+        return b.count - a.count
+      }
+      return a.tag.toLowerCase().localeCompare(b.tag.toLowerCase())
+    })
+  },
+
+  setTagFilter: (tags: string[]) => {
+    set({ tagFilters: tags })
+  },
+
+  clearTagFilter: () => {
+    set({ tagFilters: [] })
+  },
+
+  getFilteredTasksByTag: () => {
+    const { tasks, tagFilters } = get()
+
+    if (tagFilters.length === 0) {
+      return tasks
+    }
+
+    // OR logic: task matches if it has ANY of the selected tags
+    return tasks.filter((t) => {
+      return tagFilters.some((filterTag) => {
+        const normalizedFilter = filterTag.trim().toLowerCase()
+        return t.tags.some((taskTag) => taskTag.toLowerCase() === normalizedFilter)
+      })
+    })
   },
 
   // Test utility: Reset store to initial state

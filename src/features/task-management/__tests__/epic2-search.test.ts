@@ -12,14 +12,9 @@ import { useTaskStore } from '../store/task.store'
 
 describe('User Story 2.4: Search Tasks', () => {
   beforeEach(() => {
-    // Reset store state before each test
-    useTaskStore.setState({
-      tasks: [],
-      currentFilter: 'all' as any,
-      sortBy: 'dateCreated' as any,
-      sortDirection: 'desc' as any,
-      searchQuery: '',
-    })
+    // Reset store to initial state
+    // @ts-expect-error - resetStore is a test utility
+    useTaskStore.getState().resetStore()
 
     vi.useFakeTimers()
   })

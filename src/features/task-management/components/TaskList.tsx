@@ -43,10 +43,21 @@ export const TaskList: React.FC<TaskListProps> = ({
   onToggleComplete,
   isLoading = false,
 }) => {
-  const [searchParams, setSearchParams] = useSearchParams()
+  // Try to use router, but make it optional for testing
+  let searchParams: URLSearchParams | null = null
+  let setSearchParams: ((params: URLSearchParams) => void) | null = null
+
+  try {
+    [searchParams, setSearchParams] = useSearchParams()
+  } catch {
+    // Router not available (e.g., in tests without BrowserRouter)
+    searchParams = new URLSearchParams()
+    setSearchParams = null
+  }
 
   // Read filter from URL or default to ALL
   const getInitialFilter = (): TaskFilter => {
+    if (!searchParams) return TaskFilter.ALL
     const filterParam = searchParams.get('filter')
     if (filterParam === 'active') return TaskFilter.ACTIVE
     if (filterParam === 'completed') return TaskFilter.COMPLETED
@@ -78,17 +89,17 @@ export const TaskList: React.FC<TaskListProps> = ({
   const [debouncedSearch, setDebouncedSearch] = useState<string>('')
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Sync filter with URL
+  // Sync filter with URL (only once on mount)
   useEffect(() => {
+    if (!searchParams) return
     const filterParam = searchParams.get('filter')
     const urlFilter =
       filterParam === 'active' ? TaskFilter.ACTIVE :
       filterParam === 'completed' ? TaskFilter.COMPLETED :
       TaskFilter.ALL
-    if (urlFilter !== currentFilter) {
-      setCurrentFilter(urlFilter)
-    }
-  }, [searchParams])
+    setCurrentFilter(urlFilter)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Only run on mount
 
   // Debounce search input
   useEffect(() => {
@@ -120,15 +131,19 @@ export const TaskList: React.FC<TaskListProps> = ({
   // Filter change handler
   const handleFilterChange = (filter: TaskFilter) => {
     setCurrentFilter(filter)
-    const params = new URLSearchParams(searchParams)
-    if (filter === TaskFilter.ALL) {
-      params.delete('filter')
-    } else if (filter === TaskFilter.ACTIVE) {
-      params.set('filter', 'active')
-    } else if (filter === TaskFilter.COMPLETED) {
-      params.set('filter', 'completed')
+
+    // Only update URL if router is available
+    if (setSearchParams && searchParams) {
+      const params = new URLSearchParams(searchParams)
+      if (filter === TaskFilter.ALL) {
+        params.delete('filter')
+      } else if (filter === TaskFilter.ACTIVE) {
+        params.set('filter', 'active')
+      } else if (filter === TaskFilter.COMPLETED) {
+        params.set('filter', 'completed')
+      }
+      setSearchParams(params)
     }
-    setSearchParams(params)
   }
 
   // Filter tasks

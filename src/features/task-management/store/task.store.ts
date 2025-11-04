@@ -75,13 +75,17 @@ const loadSortPreferenceFromStorage = (): { sortBy: TaskSortBy; sortDirection: T
   return null
 }
 
-export const useTaskStore = create<TaskState>((set, get) => ({
-  // State
+const initialState = {
   tasks: [],
   currentFilter: TaskFilter.ALL,
   sortBy: TaskSortBy.DATE_CREATED,
   sortDirection: TaskSortDirection.DESC,
   searchQuery: '',
+}
+
+export const useTaskStore = create<TaskState>((set, get) => ({
+  // State
+  ...initialState,
 
   // EPIC 1: Task CRUD Actions
   addTask: (dto: CreateTaskDto) => {
@@ -588,5 +592,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     })
 
     return sorted
+  },
+
+  // Test utility: Reset store to initial state
+  resetStore: () => {
+    set(initialState)
   },
 }))

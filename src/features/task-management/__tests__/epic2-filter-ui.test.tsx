@@ -227,41 +227,45 @@ describe('User Story 2.2: Filter Tasks UI', () => {
       const user = userEvent.setup()
       renderWithRouter(<TaskList tasks={allTasks} />)
 
-      const activeButton = screen.getByRole('button', { name: /active/i })
+      const filterGroup = screen.getByRole('group', { name: /filter tasks/i })
+      const activeButton = within(filterGroup).getByRole('button', { name: /active/i })
       await user.click(activeButton)
 
-      expect(mockSetSearchParams).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: 'active' })
-      )
+      expect(mockSetSearchParams).toHaveBeenCalled()
+      const callArg = mockSetSearchParams.mock.calls[0][0]
+      expect(callArg.get('filter')).toBe('active')
     })
 
     it('should update URL when filter changes to Completed', async () => {
       const user = userEvent.setup()
       renderWithRouter(<TaskList tasks={allTasks} />)
 
-      const completedButton = screen.getByRole('button', { name: /completed/i })
+      const filterGroup = screen.getByRole('group', { name: /filter tasks/i })
+      const completedButton = within(filterGroup).getByRole('button', { name: /completed/i })
       await user.click(completedButton)
 
-      expect(mockSetSearchParams).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: 'completed' })
-      )
+      expect(mockSetSearchParams).toHaveBeenCalled()
+      const callArg = mockSetSearchParams.mock.calls[0][0]
+      expect(callArg.get('filter')).toBe('completed')
     })
 
     it('should update URL when filter changes to All', async () => {
       const user = userEvent.setup()
       renderWithRouter(<TaskList tasks={allTasks} />)
 
+      const filterGroup = screen.getByRole('group', { name: /filter tasks/i })
+
       // First set to Active
-      const activeButton = screen.getByRole('button', { name: /active/i })
+      const activeButton = within(filterGroup).getByRole('button', { name: /active/i })
       await user.click(activeButton)
 
       // Then back to All
-      const allButton = screen.getByRole('button', { name: /all/i })
+      const allButton = within(filterGroup).getByRole('button', { name: /all/i })
       await user.click(allButton)
 
-      expect(mockSetSearchParams).toHaveBeenLastCalledWith(
-        expect.objectContaining({ filter: 'all' })
-      )
+      // When filter is ALL, the URL param is deleted (not set to 'all')
+      const lastCall = mockSetSearchParams.mock.calls[mockSetSearchParams.mock.calls.length - 1][0]
+      expect(lastCall.has('filter')).toBe(false)
     })
 
     it('should read filter from URL on mount', () => {
@@ -279,7 +283,8 @@ describe('User Story 2.2: Filter Tasks UI', () => {
       expect(screen.queryByText('Completed Task 1')).not.toBeInTheDocument()
 
       // Active button should be highlighted
-      const activeButton = screen.getByRole('button', { name: /active/i })
+      const filterGroup = screen.getByRole('group', { name: /filter tasks/i })
+      const activeButton = within(filterGroup).getByRole('button', { name: /active/i })
       expect(activeButton).toHaveClass('bg-blue-600')
     })
 
@@ -357,16 +362,18 @@ describe('User Story 2.2: Filter Tasks UI', () => {
     it('should have proper ARIA labels for filter buttons', () => {
       renderWithRouter(<TaskList tasks={allTasks} />)
 
-      expect(screen.getByRole('button', { name: /all/i })).toHaveAttribute('aria-label')
-      expect(screen.getByRole('button', { name: /active/i })).toHaveAttribute('aria-label')
-      expect(screen.getByRole('button', { name: /completed/i })).toHaveAttribute('aria-label')
+      const filterGroup = screen.getByRole('group', { name: /filter tasks/i })
+      expect(within(filterGroup).getByRole('button', { name: /all/i })).toHaveAttribute('aria-label')
+      expect(within(filterGroup).getByRole('button', { name: /active/i })).toHaveAttribute('aria-label')
+      expect(within(filterGroup).getByRole('button', { name: /completed/i })).toHaveAttribute('aria-label')
     })
 
     it('should use aria-pressed for active filter state', () => {
       renderWithRouter(<TaskList tasks={allTasks} />)
 
-      const allButton = screen.getByRole('button', { name: /all/i })
-      const activeButton = screen.getByRole('button', { name: /active/i })
+      const filterGroup = screen.getByRole('group', { name: /filter tasks/i })
+      const allButton = within(filterGroup).getByRole('button', { name: /all/i })
+      const activeButton = within(filterGroup).getByRole('button', { name: /active/i })
 
       expect(allButton).toHaveAttribute('aria-pressed', 'true')
       expect(activeButton).toHaveAttribute('aria-pressed', 'false')

@@ -20,14 +20,9 @@ enum TaskFilter {
 
 describe('User Story 2.2: Filter Tasks by Status', () => {
   beforeEach(() => {
-    // Reset store state before each test
-    useTaskStore.setState({
-      tasks: [],
-      currentFilter: 'all' as any,
-      sortBy: 'dateCreated' as any,
-      sortDirection: 'desc' as any,
-      searchQuery: '',
-    })
+    // Reset store to initial state
+    // @ts-expect-error - resetStore is a test utility
+    useTaskStore.getState().resetStore()
   })
 
   describe('Store - Filter State Management', () => {

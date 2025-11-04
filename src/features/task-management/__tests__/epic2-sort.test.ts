@@ -33,14 +33,9 @@ enum TaskPriority {
 
 describe('User Story 2.3: Sort Tasks', () => {
   beforeEach(() => {
-    // Reset store state before each test
-    useTaskStore.setState({
-      tasks: [],
-      currentFilter: 'all' as any,
-      sortBy: TaskSortBy.DATE_CREATED as any,
-      sortDirection: TaskSortDirection.DESC as any,
-      searchQuery: '',
-    })
+    // Reset store to initial state
+    // @ts-expect-error - resetStore is a test utility
+    useTaskStore.getState().resetStore()
 
     // Clear localStorage
     localStorage.clear()

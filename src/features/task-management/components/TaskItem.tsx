@@ -2,16 +2,21 @@
  * TaskItem Component
  * EPIC 1: Task Management Core
  * EPIC 2: Task Organization
+ * EPIC 3: Categories & Tags
  *
  * User Story 1.4: Delete Task
  * User Story 1.5: Mark Task Complete
  * User Story 2.1: Add Task Priority
  * User Story 2.5: Add Due Dates
+ * User Story 3.2: Assign Category to Task (display category badge)
+ * User Story 3.4: Add Tags to Tasks (display tags)
  */
 
 import React from 'react'
 import type { Task } from '../types/task.types'
 import { TaskStatus, TaskPriority } from '../types/task.types'
+import { useTaskStore } from '../store/task.store'
+import { TagList } from './tag/TagList'
 
 interface TaskItemProps {
   task: Task
@@ -98,6 +103,8 @@ const isOverdue = (dueDate: Date | null, status: TaskStatus): boolean => {
 export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onToggleComplete }) => {
   const isCompleted = task.status === TaskStatus.COMPLETED
   const taskIsOverdue = isOverdue(task.dueDate, task.status)
+  const getCategoryById = useTaskStore((state) => state.getCategoryById)
+  const category = task.categoryId ? getCategoryById(task.categoryId) : null
 
   return (
     <article
@@ -139,6 +146,25 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onTo
           <p className="mt-1 text-gray-600">
             {task.description || 'No description'}
           </p>
+
+          {/* Category Badge */}
+          {category && (
+            <span
+              data-testid={`task-category-badge-${task.id}`}
+              style={{ backgroundColor: category.color }}
+              aria-label={`Category: ${category.name}`}
+              className="inline-block mt-2 px-2 py-1 text-xs font-medium text-white rounded"
+            >
+              {category.name}
+            </span>
+          )}
+
+          {/* Tags */}
+          {task.tags && task.tags.length > 0 && (
+            <div className="mt-2">
+              <TagList taskId={task.id} tags={task.tags} />
+            </div>
+          )}
 
           {/* Priority Badge and Due Date */}
           {(task.priority || task.dueDate) && (

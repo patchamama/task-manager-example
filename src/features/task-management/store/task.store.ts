@@ -3,11 +3,13 @@
  * EPIC 1: Task Management Core
  * EPIC 2: Task Organization
  * EPIC 3: Categories & Tags
+ * EPIC 5.1: LocalStorage Persistence
  *
- * Zustand store for task state management
+ * Zustand store for task state management with localStorage persistence
  */
 
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import type { TaskState, CreateTaskDto, UpdateTaskDto, Task, Category, CreateCategoryDto, UpdateCategoryDto } from '../types/task.types'
 import { TaskStatus, TaskPriority, TaskFilter, TaskSortBy, TaskSortDirection } from '../types/task.types'
 
@@ -87,9 +89,44 @@ const initialState = {
   searchQuery: '',
 }
 
-export const useTaskStore = create<TaskState>((set, get) => ({
-  // State
-  ...initialState,
+/**
+ * Custom storage with error handling for quota exceeded and corrupted data
+ */
+const customStorage = {
+  getItem: (name: string): string | null => {
+    try {
+      return localStorage.getItem(name)
+    } catch (error) {
+      console.error('Error reading from localStorage:', error)
+      return null
+    }
+  },
+  setItem: (name: string, value: string): void => {
+    try {
+      localStorage.setItem(name, value)
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.error('LocalStorage quota exceeded. Data not saved.')
+        // Silently fail - don't throw to prevent app crash
+      } else {
+        console.error('Error writing to localStorage:', error)
+      }
+    }
+  },
+  removeItem: (name: string): void => {
+    try {
+      localStorage.removeItem(name)
+    } catch (error) {
+      console.error('Error removing from localStorage:', error)
+    }
+  },
+}
+
+export const useTaskStore = create<TaskState>()(
+  persist(
+    (set, get) => ({
+      // State
+      ...initialState,
 
   // EPIC 1: Task CRUD Actions
   addTask: (dto: CreateTaskDto) => {
@@ -1019,4 +1056,57 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   resetStore: () => {
     set(initialState)
   },
-}))
+}),
+{
+  name: 'task-store',
+  storage: createJSONStorage(() => customStorage),
+  version: 0,
+  // Custom deserialization to handle Date objects
+  partialize: (state) => ({
+    tasks: state.tasks,
+    categories: state.categories,
+    currentFilter: state.currentFilter,
+    categoryFilters: state.categoryFilters,
+    tagFilters: state.tagFilters,
+    sortBy: state.sortBy,
+    sortDirection: state.sortDirection,
+    searchQuery: state.searchQuery,
+  }),
+  // Handle corrupted data gracefully
+  onRehydrateStorage: () => (state, error) => {
+    if (error) {
+      console.error('Error rehydrating store:', error)
+      // Don't throw - use initial state instead
+    }
+  },
+  // Deserialize dates from ISO strings
+  merge: (persistedState, currentState) => {
+    if (!persistedState) return currentState
+
+    const persisted = persistedState as Partial<TaskState>
+
+    // Reconstruct Date objects from ISO strings
+    const tasks = (persisted.tasks || []).map((task: any) => ({
+      ...task,
+      createdAt: new Date(task.createdAt),
+      updatedAt: new Date(task.updatedAt),
+      completedAt: task.completedAt ? new Date(task.completedAt) : null,
+      dueDate: task.dueDate ? new Date(task.dueDate) : null,
+    }))
+
+    const categories = (persisted.categories || []).map((category: any) => ({
+      ...category,
+      createdAt: new Date(category.createdAt),
+      updatedAt: new Date(category.updatedAt),
+    }))
+
+    return {
+      ...currentState,
+      ...persisted,
+      tasks,
+      categories,
+    }
+  },
+}
+)
+)

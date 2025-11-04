@@ -111,6 +111,8 @@ describe('TaskForm Component', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         title: 'My Task',
         description: 'My Description',
+        priority: 'medium',
+        dueDate: null,
       })
     })
 
@@ -127,6 +129,8 @@ describe('TaskForm Component', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         title: 'My Task',
         description: '',
+        priority: 'medium',
+        dueDate: null,
       })
     })
 
@@ -270,6 +274,8 @@ describe('TaskForm Component', () => {
       title: 'Existing Task',
       description: 'Existing Description',
       status: TaskStatus.PENDING,
+      priority: 'medium' as any,
+      dueDate: null,
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
       completedAt: null,
@@ -360,6 +366,8 @@ describe('TaskForm Component', () => {
       title: 'Existing Task',
       description: 'Existing Description',
       status: TaskStatus.PENDING,
+      priority: 'medium' as any,
+      dueDate: null,
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
       completedAt: null,
@@ -498,6 +506,8 @@ describe('TaskForm Component', () => {
       title: 'Existing Task',
       description: 'Existing Description',
       status: TaskStatus.PENDING,
+      priority: 'medium' as any,
+      dueDate: null,
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
       completedAt: null,

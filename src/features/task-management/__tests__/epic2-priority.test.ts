@@ -26,8 +26,13 @@ interface TaskWithPriority extends CreateTaskDto {
 describe('User Story 2.1: Add Task Priority', () => {
   beforeEach(() => {
     // Reset store state before each test
-    const { tasks } = useTaskStore.getState()
-    tasks.forEach((task) => useTaskStore.getState().deleteTask(task.id))
+    useTaskStore.setState({
+      tasks: [],
+      currentFilter: 'all' as any,
+      sortBy: 'dateCreated' as any,
+      sortDirection: 'desc' as any,
+      searchQuery: '',
+    })
   })
 
   describe('Store - Priority Management', () => {

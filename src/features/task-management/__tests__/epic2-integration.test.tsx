@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * EPIC 2 Integration Tests
  * Task Organization - Combined Features
@@ -12,6 +13,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { TaskList } from '../components/TaskList'
 import { TaskStatus, type Task } from '../types/task.types'
@@ -29,6 +31,7 @@ type TaskWithEpic2Features = Task & {
 }
 
 describe('EPIC 2: Task Organization Integration', () => {
+  const renderWithRouter = render
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers()
@@ -103,7 +106,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Filter to active
       const activeButton = screen.getByRole('button', { name: /active/i })
@@ -127,7 +130,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Filter to completed
       const completedButton = screen.getByRole('button', { name: /completed/i })
@@ -150,7 +153,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Filter to active
       const activeButton = screen.getByRole('button', { name: /active/i })
@@ -172,7 +175,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Filter to completed
       const completedButton = screen.getByRole('button', { name: /completed/i })
@@ -195,7 +198,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Search for tasks with "e" in title/description
       const searchInput = screen.getByRole('searchbox')
@@ -218,7 +221,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Search for "team" or "review"
       const searchInput = screen.getByRole('searchbox')
@@ -241,7 +244,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // 1. Filter to active
       const activeButton = screen.getByRole('button', { name: /active/i })
@@ -281,7 +284,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       ]
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Should show priority badge
       expect(screen.getByText(/high/i)).toBeInTheDocument()
@@ -299,7 +302,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Search for "bug"
       const searchInput = screen.getByRole('searchbox')
@@ -323,7 +326,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // 1. Set sort to priority
       const sortSelect = screen.getByLabelText(/sort by/i)
@@ -369,7 +372,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       ]
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Should show critical priority
       expect(screen.getByText(/critical/i)).toBeInTheDocument()
@@ -387,7 +390,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       const tasks = createFullFeaturedTasks()
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Sort by priority
       const sortSelect = screen.getByLabelText(/sort by/i)
@@ -420,7 +423,7 @@ describe('EPIC 2: Task Organization Integration', () => {
       }))
 
       // @ts-expect-error - tasks don't support EPIC 2 features yet
-      render(<TaskList tasks={largeTasks} />)
+      renderWithRouter(<TaskList tasks={largeTasks} />)
 
       // Apply filter
       const activeButton = screen.getByRole('button', { name: /active/i })

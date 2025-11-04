@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * Task Due Dates UI Tests - EPIC 2
  * User Story 2.5: Add Due Dates
@@ -8,6 +9,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { TaskForm } from '../components/TaskForm'
 import { TaskItem } from '../components/TaskItem'
@@ -20,6 +22,7 @@ type TaskWithDueDate = Task & {
 }
 
 describe('User Story 2.5: Due Dates UI', () => {
+  const renderWithRouter = render
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers()
@@ -444,7 +447,7 @@ describe('User Story 2.5: Due Dates UI', () => {
 
     it('should include "Due Date" in sort options', () => {
       // @ts-expect-error - tasks prop doesn't support dueDate yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       expect(within(sortSelect).getByRole('option', { name: /due date/i })).toBeInTheDocument()
@@ -453,7 +456,7 @@ describe('User Story 2.5: Due Dates UI', () => {
     it('should sort by due date ascending (soonest first)', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support dueDate yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       await user.selectOptions(sortSelect, 'dueDate')
@@ -470,7 +473,7 @@ describe('User Story 2.5: Due Dates UI', () => {
     it('should place tasks without due date at end when sorting', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support dueDate yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       await user.selectOptions(sortSelect, 'dueDate')
@@ -507,7 +510,7 @@ describe('User Story 2.5: Due Dates UI', () => {
       ]
 
       // @ts-expect-error - tasks prop doesn't support dueDate yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       expect(screen.getByText(/2.*overdue/i)).toBeInTheDocument()
     })
@@ -527,7 +530,7 @@ describe('User Story 2.5: Due Dates UI', () => {
       ]
 
       // @ts-expect-error - tasks prop doesn't support dueDate yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       expect(screen.queryByText(/overdue/i)).not.toBeInTheDocument()
     })

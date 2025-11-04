@@ -13,8 +13,13 @@ import { useTaskStore } from '../store/task.store'
 describe('User Story 2.4: Search Tasks', () => {
   beforeEach(() => {
     // Reset store state before each test
-    const { tasks } = useTaskStore.getState()
-    tasks.forEach((task) => useTaskStore.getState().deleteTask(task.id))
+    useTaskStore.setState({
+      tasks: [],
+      currentFilter: 'all' as any,
+      sortBy: 'dateCreated' as any,
+      sortDirection: 'desc' as any,
+      searchQuery: '',
+    })
 
     vi.useFakeTimers()
   })

@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * Task Sort UI Tests - EPIC 2
  * User Story 2.3: Sort Tasks
@@ -8,6 +9,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { TaskList } from '../components/TaskList'
 import { TaskStatus, type Task } from '../types/task.types'
@@ -24,6 +26,7 @@ type TaskWithPriority = Task & {
 }
 
 describe('User Story 2.3: Sort Tasks UI', () => {
+  const renderWithRouter = render
   const tasks: TaskWithPriority[] = [
     {
       id: '1',
@@ -64,14 +67,14 @@ describe('User Story 2.3: Sort Tasks UI', () => {
 
   describe('Sort Controls', () => {
     it('should render sort dropdown', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       expect(sortSelect).toBeInTheDocument()
     })
 
     it('should have sort options: Date Created, Priority, Title', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       expect(screen.getByRole('option', { name: /date created/i })).toBeInTheDocument()
       expect(screen.getByRole('option', { name: /priority/i })).toBeInTheDocument()
@@ -79,21 +82,21 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     })
 
     it('should default to Date Created sort', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i) as HTMLSelectElement
       expect(sortSelect.value).toBe('dateCreated')
     })
 
     it('should render sort direction toggle button', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const directionButton = screen.getByRole('button', { name: /sort direction/i })
       expect(directionButton).toBeInTheDocument()
     })
 
     it('should show descending icon by default', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const directionButton = screen.getByRole('button', { name: /sort direction/i })
       expect(directionButton).toHaveAttribute('aria-label', expect.stringContaining('descending'))
@@ -103,7 +106,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
   describe('Sort by Date Created', () => {
     it('should display tasks in newest-first order by default', () => {
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const taskElements = screen.getAllByRole('article')
       expect(taskElements[0]).toHaveTextContent('Middle Task') // Jan 3
@@ -114,7 +117,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should display tasks in oldest-first order when direction toggled', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const directionButton = screen.getByRole('button', { name: /sort direction/i })
       await user.click(directionButton)
@@ -130,7 +133,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should sort by priority when selected', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       await user.selectOptions(sortSelect, 'priority')
@@ -145,7 +148,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should sort by priority ascending when direction toggled', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       await user.selectOptions(sortSelect, 'priority')
@@ -165,7 +168,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should sort by title alphabetically when selected', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       await user.selectOptions(sortSelect, 'title')
@@ -182,7 +185,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should sort by title reverse alphabetically when descending', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       await user.selectOptions(sortSelect, 'title')
@@ -199,7 +202,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should toggle sort direction when button clicked', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const directionButton = screen.getByRole('button', { name: /sort direction/i })
 
@@ -218,7 +221,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should show ascending icon when direction is ascending', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const directionButton = screen.getByRole('button', { name: /sort direction/i })
       await user.click(directionButton)
@@ -230,7 +233,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
 
     it('should show descending icon when direction is descending', () => {
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const directionButton = screen.getByRole('button', { name: /sort direction/i })
 
@@ -242,7 +245,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should immediately re-sort tasks when direction changes', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       let taskElements = screen.getAllByRole('article')
       const firstTaskBefore = taskElements[0].textContent
@@ -261,7 +264,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should highlight current sort option in dropdown', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       await user.selectOptions(sortSelect, 'priority')
@@ -271,7 +274,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
 
     it('should show sort label indicating current sort', () => {
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortLabel = screen.getByText(/sorted by.*date created/i)
       expect(sortLabel).toBeInTheDocument()
@@ -280,7 +283,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should update sort label when sort changes', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       await user.selectOptions(sortSelect, 'title')
@@ -294,7 +297,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should save sort preference to localStorage when changed', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       await user.selectOptions(sortSelect, 'priority')
@@ -309,7 +312,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should save sort direction to localStorage when toggled', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const directionButton = screen.getByRole('button', { name: /sort direction/i })
       await user.click(directionButton)
@@ -329,7 +332,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
       )
 
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i) as HTMLSelectElement
       expect(sortSelect.value).toBe('title')
@@ -358,7 +361,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
       ]
 
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasksWithCompleted} />)
+      renderWithRouter(<TaskList tasks={tasksWithCompleted} />)
 
       // Filter to active
       const activeButton = screen.getByRole('button', { name: /active/i })
@@ -383,7 +386,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
   describe('Accessibility', () => {
     it('should have accessible label for sort select', () => {
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       expect(sortSelect).toHaveAttribute('aria-label')
@@ -391,7 +394,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
 
     it('should have accessible label for direction button', () => {
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const directionButton = screen.getByRole('button', { name: /sort direction/i })
       expect(directionButton).toHaveAttribute('aria-label')
@@ -399,7 +402,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
 
     it('should announce current sort to screen readers', () => {
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const sortRegion = screen.getByRole('region', { name: /sort controls/i })
       expect(sortRegion).toHaveAttribute('aria-live', 'polite')
@@ -408,7 +411,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
     it('should be keyboard navigable', async () => {
       const user = userEvent.setup()
       // @ts-expect-error - tasks prop doesn't support priority yet
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       // Tab to sort select
       await user.tab()
@@ -424,7 +427,7 @@ describe('User Story 2.3: Sort Tasks UI', () => {
 
   describe('Empty State', () => {
     it('should handle sorting empty task list', () => {
-      render(<TaskList tasks={[]} />)
+      renderWithRouter(<TaskList tasks={[]} />)
 
       const sortSelect = screen.getByLabelText(/sort by/i)
       expect(sortSelect).toBeInTheDocument()

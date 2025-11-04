@@ -5,10 +5,12 @@
  * User Story 1.2: View Task List
  */
 
+import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import { TaskList } from '../components/TaskList'
-import { TaskStatus, type Task } from '../types/task.types'
+import { TaskStatus, TaskPriority, type Task } from '../types/task.types'
 
 describe('TaskList Component', () => {
   const mockTasks: Task[] = [
@@ -17,6 +19,8 @@ describe('TaskList Component', () => {
       title: 'First Task',
       description: 'This is the first task description',
       status: TaskStatus.PENDING,
+      priority: TaskPriority.MEDIUM,
+      dueDate: null,
       createdAt: new Date('2024-01-03T10:00:00'),
       updatedAt: new Date('2024-01-03T10:00:00'),
       completedAt: null,
@@ -26,6 +30,8 @@ describe('TaskList Component', () => {
       title: 'Second Task',
       description: 'This is the second task description that is quite a bit longer and should be truncated in the preview',
       status: TaskStatus.COMPLETED,
+      priority: TaskPriority.HIGH,
+      dueDate: null,
       createdAt: new Date('2024-01-02T10:00:00'),
       updatedAt: new Date('2024-01-02T10:00:00'),
       completedAt: new Date('2024-01-02T11:00:00'),
@@ -35,6 +41,8 @@ describe('TaskList Component', () => {
       title: 'Third Task',
       description: '',
       status: TaskStatus.PENDING,
+      priority: TaskPriority.LOW,
+      dueDate: null,
       createdAt: new Date('2024-01-01T10:00:00'),
       updatedAt: new Date('2024-01-01T10:00:00'),
       completedAt: null,
@@ -44,6 +52,10 @@ describe('TaskList Component', () => {
   const mockOnEdit = vi.fn()
   const mockOnDelete = vi.fn()
   const mockOnToggleComplete = vi.fn()
+
+  const renderWithRouter = (component: React.ReactElement) => {
+    return render(<BrowserRouter>{component}</BrowserRouter>)
+  }
 
   beforeEach(() => {
     vi.clearAllMocks()

@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * Task Filter UI Tests - EPIC 2
  * User Story 2.2: Filter Tasks by Status
@@ -8,6 +9,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { TaskList } from '../components/TaskList'
 import { TaskStatus, type Task } from '../types/task.types'
@@ -19,6 +21,7 @@ vi.mock('react-router-dom', () => ({
 }))
 
 describe('User Story 2.2: Filter Tasks UI', () => {
+  const renderWithRouter = render
   const pendingTask1: Task = {
     id: '1',
     title: 'Pending Task 1',
@@ -67,7 +70,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
   describe('Filter Controls', () => {
     it('should render filter buttons: All, Active, Completed', () => {
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       expect(screen.getByRole('button', { name: /all/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /active/i })).toBeInTheDocument()
@@ -75,14 +78,14 @@ describe('User Story 2.2: Filter Tasks UI', () => {
     })
 
     it('should show All filter as active by default', () => {
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const allButton = screen.getByRole('button', { name: /all/i })
       expect(allButton).toHaveAttribute('aria-pressed', 'true')
     })
 
     it('should show task count for each filter', () => {
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       // All: 4 tasks
       const allButton = screen.getByRole('button', { name: /all.*4/i })
@@ -98,14 +101,14 @@ describe('User Story 2.2: Filter Tasks UI', () => {
     })
 
     it('should highlight active filter button', () => {
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const allButton = screen.getByRole('button', { name: /all/i })
       expect(allButton).toHaveClass('bg-blue-500')
     })
 
     it('should not highlight inactive filter buttons', () => {
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const activeButton = screen.getByRole('button', { name: /active/i })
       const completedButton = screen.getByRole('button', { name: /completed/i })
@@ -117,7 +120,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
   describe('Filter Interaction', () => {
     it('should show all tasks by default', () => {
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       expect(screen.getByText('Pending Task 1')).toBeInTheDocument()
       expect(screen.getByText('Pending Task 2')).toBeInTheDocument()
@@ -127,7 +130,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
     it('should filter to show only active tasks when Active is clicked', async () => {
       const user = userEvent.setup()
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const activeButton = screen.getByRole('button', { name: /active/i })
       await user.click(activeButton)
@@ -143,7 +146,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
     it('should filter to show only completed tasks when Completed is clicked', async () => {
       const user = userEvent.setup()
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const completedButton = screen.getByRole('button', { name: /completed/i })
       await user.click(completedButton)
@@ -159,7 +162,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
     it('should return to showing all tasks when All is clicked', async () => {
       const user = userEvent.setup()
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       // Click Active first
       const activeButton = screen.getByRole('button', { name: /active/i })
@@ -178,7 +181,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
     it('should update filter button styling when filter changes', async () => {
       const user = userEvent.setup()
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const activeButton = screen.getByRole('button', { name: /active/i })
       await user.click(activeButton)
@@ -189,7 +192,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
     it('should update filter immediately without delay', async () => {
       const user = userEvent.setup()
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const completedButton = screen.getByRole('button', { name: /completed/i })
       await user.click(completedButton)
@@ -203,7 +206,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
   describe('URL State Persistence', () => {
     it('should update URL when filter changes to Active', async () => {
       const user = userEvent.setup()
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const activeButton = screen.getByRole('button', { name: /active/i })
       await user.click(activeButton)
@@ -215,7 +218,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
     it('should update URL when filter changes to Completed', async () => {
       const user = userEvent.setup()
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const completedButton = screen.getByRole('button', { name: /completed/i })
       await user.click(completedButton)
@@ -227,7 +230,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
     it('should update URL when filter changes to All', async () => {
       const user = userEvent.setup()
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       // First set to Active
       const activeButton = screen.getByRole('button', { name: /active/i })
@@ -250,7 +253,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
         mockSetSearchParams,
       ])
 
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       // Should show only active tasks
       expect(screen.getByText('Pending Task 1')).toBeInTheDocument()
@@ -268,7 +271,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
         mockSetSearchParams,
       ])
 
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       // Should show all tasks
       expect(screen.getByText('Pending Task 1')).toBeInTheDocument()
@@ -282,7 +285,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
         mockSetSearchParams,
       ])
 
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       // Should default to All
       expect(screen.getByText('Pending Task 1')).toBeInTheDocument()
@@ -295,7 +298,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
       const user = userEvent.setup()
       const onlyCompletedTasks = [completedTask1, completedTask2]
 
-      render(<TaskList tasks={onlyCompletedTasks} />)
+      renderWithRouter(<TaskList tasks={onlyCompletedTasks} />)
 
       const activeButton = screen.getByRole('button', { name: /active/i })
       await user.click(activeButton)
@@ -307,7 +310,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
       const user = userEvent.setup()
       const onlyPendingTasks = [pendingTask1, pendingTask2]
 
-      render(<TaskList tasks={onlyPendingTasks} />)
+      renderWithRouter(<TaskList tasks={onlyPendingTasks} />)
 
       const completedButton = screen.getByRole('button', { name: /completed/i })
       await user.click(completedButton)
@@ -316,7 +319,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
     })
 
     it('should show generic empty message when All filter has no results', () => {
-      render(<TaskList tasks={[]} />)
+      renderWithRouter(<TaskList tasks={[]} />)
 
       expect(screen.getByText(/no tasks yet/i)).toBeInTheDocument()
     })
@@ -324,7 +327,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
     it('should show filter count of 0 for empty filters', () => {
       const onlyPendingTasks = [pendingTask1]
 
-      render(<TaskList tasks={onlyPendingTasks} />)
+      renderWithRouter(<TaskList tasks={onlyPendingTasks} />)
 
       const completedButton = screen.getByRole('button', { name: /completed.*0/i })
       expect(completedButton).toBeInTheDocument()
@@ -333,7 +336,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
 
   describe('Accessibility', () => {
     it('should have proper ARIA labels for filter buttons', () => {
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       expect(screen.getByRole('button', { name: /all/i })).toHaveAttribute('aria-label')
       expect(screen.getByRole('button', { name: /active/i })).toHaveAttribute('aria-label')
@@ -341,7 +344,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
     })
 
     it('should use aria-pressed for active filter state', () => {
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const allButton = screen.getByRole('button', { name: /all/i })
       const activeButton = screen.getByRole('button', { name: /active/i })
@@ -351,7 +354,7 @@ describe('User Story 2.2: Filter Tasks UI', () => {
     })
 
     it('should have a landmark role for filter controls', () => {
-      render(<TaskList tasks={allTasks} />)
+      renderWithRouter(<TaskList tasks={allTasks} />)
 
       const filterSection = screen.getByRole('group', { name: /filter/i })
       expect(filterSection).toBeInTheDocument()

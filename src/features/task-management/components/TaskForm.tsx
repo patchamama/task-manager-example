@@ -1,34 +1,48 @@
 /**
  * TaskForm Component
  * EPIC 1: Task Management Core
+ * EPIC 2: Task Organization
  *
  * User Story 1.1: Create Task
  * User Story 1.3: Edit Task
+ * User Story 2.1: Add Task Priority
+ * User Story 2.5: Add Due Dates
  */
 
 import React, { useState, useEffect } from 'react'
 import type { Task, CreateTaskDto } from '../types/task.types'
+import { TaskPriority } from '../types/task.types'
 
 interface TaskFormProps {
   task?: Task
+  initialValues?: Task
   onSubmit: (dto: CreateTaskDto) => void
   onCancel: () => void
 }
 
-export const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel }) => {
+export const TaskForm: React.FC<TaskFormProps> = ({ task, initialValues, onSubmit, onCancel }) => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [priority, setPriority] = useState<TaskPriority>(TaskPriority.MEDIUM)
+  const [dueDate, setDueDate] = useState<string>('')
   const [errors, setErrors] = useState<{ title?: string; description?: string }>({})
 
-  const isEditMode = !!task
+  const editTask = task || initialValues
+  const isEditMode = !!editTask
 
   // Pre-fill form in edit mode
   useEffect(() => {
-    if (task) {
-      setTitle(task.title)
-      setDescription(task.description)
+    if (editTask) {
+      setTitle(editTask.title)
+      setDescription(editTask.description)
+      setPriority(editTask.priority)
+      if (editTask.dueDate) {
+        const date = new Date(editTask.dueDate)
+        const formatted = date.toISOString().split('T')[0]
+        setDueDate(formatted)
+      }
     }
-  }, [task])
+  }, [editTask])
 
   const validateForm = (): boolean => {
     const newErrors: { title?: string; description?: string } = {}
@@ -54,15 +68,21 @@ export const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel }) 
       return
     }
 
+    const dueDateObj = dueDate ? new Date(dueDate) : null
+
     onSubmit({
       title,
       description,
+      priority,
+      dueDate: dueDateObj,
     })
 
     // Reset form only in create mode
     if (!isEditMode) {
       setTitle('')
       setDescription('')
+      setPriority(TaskPriority.MEDIUM)
+      setDueDate('')
       setErrors({})
     }
   }
@@ -120,6 +140,38 @@ export const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel }) 
             {errors.description}
           </div>
         )}
+      </div>
+
+      {/* Priority Selector */}
+      <div className="space-y-2">
+        <label htmlFor="task-priority" className="block text-sm font-medium">
+          Priority
+        </label>
+        <select
+          id="task-priority"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as TaskPriority)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value={TaskPriority.LOW}>Low</option>
+          <option value={TaskPriority.MEDIUM}>Medium</option>
+          <option value={TaskPriority.HIGH}>High</option>
+          <option value={TaskPriority.CRITICAL}>Critical</option>
+        </select>
+      </div>
+
+      {/* Due Date Picker */}
+      <div className="space-y-2">
+        <label htmlFor="task-due-date" className="block text-sm font-medium">
+          Due Date <span className="text-gray-500 font-normal">(Optional)</span>
+        </label>
+        <input
+          id="task-due-date"
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       {/* Action Buttons */}

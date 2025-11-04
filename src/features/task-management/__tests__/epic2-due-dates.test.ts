@@ -20,8 +20,13 @@ interface TaskWithDueDate extends CreateTaskDto {
 describe('User Story 2.5: Add Due Dates', () => {
   beforeEach(() => {
     // Reset store state before each test
-    const { tasks } = useTaskStore.getState()
-    tasks.forEach((task) => useTaskStore.getState().deleteTask(task.id))
+    useTaskStore.setState({
+      tasks: [],
+      currentFilter: 'all' as any,
+      sortBy: 'dateCreated' as any,
+      sortDirection: 'desc' as any,
+      searchQuery: '',
+    })
 
     // Use fake timers for consistent date testing
     vi.useFakeTimers()
@@ -210,17 +215,30 @@ describe('User Story 2.5: Add Due Dates', () => {
 
   describe('Store - Overdue Detection', () => {
     it('should identify task as overdue when due date has passed', () => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2024-01-15')) // Set current time
+
       const overdueDate = new Date('2024-01-10') // Before current time
-      // Create with validation disabled for test setup
-      const task = {
-        id: '1',
-        title: 'Overdue Task',
-        dueDate: overdueDate,
-      }
+      // Manually add task to store to bypass validation
+      useTaskStore.setState({
+        tasks: [{
+          id: '1',
+          title: 'Overdue Task',
+          description: '',
+          status: 'pending' as any,
+          priority: 'medium' as any,
+          dueDate: overdueDate,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          completedAt: null,
+        }]
+      })
 
       // @ts-expect-error - isOverdue action doesn't exist yet
-      const isOverdue = useTaskStore.getState().isOverdue(task.id)
+      const isOverdue = useTaskStore.getState().isOverdue('1')
       expect(isOverdue).toBe(true)
+
+      vi.useRealTimers()
     })
 
     it('should not identify task as overdue when due date is future', () => {
@@ -335,6 +353,9 @@ describe('User Story 2.5: Add Due Dates', () => {
 
   describe('Store - Filter by Due Date', () => {
     beforeEach(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2024-01-15'))
+
       const today = new Date('2024-01-15')
       const tomorrow = new Date('2024-01-16')
       const nextWeek = new Date('2024-01-22')
@@ -348,6 +369,10 @@ describe('User Story 2.5: Add Due Dates', () => {
       useTaskStore.getState().addTask({ title: 'Due Next Week', dueDate: nextWeek })
       // @ts-expect-error - dueDate parameter not supported yet
       useTaskStore.getState().addTask({ title: 'Due Next Month', dueDate: nextMonth })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
     })
 
     it('should get tasks due today', () => {

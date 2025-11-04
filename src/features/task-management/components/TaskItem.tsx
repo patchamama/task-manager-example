@@ -1,14 +1,17 @@
 /**
  * TaskItem Component
  * EPIC 1: Task Management Core
+ * EPIC 2: Task Organization
  *
  * User Story 1.4: Delete Task
  * User Story 1.5: Mark Task Complete
+ * User Story 2.1: Add Task Priority
+ * User Story 2.5: Add Due Dates
  */
 
 import React from 'react'
 import type { Task } from '../types/task.types'
-import { TaskStatus } from '../types/task.types'
+import { TaskStatus, TaskPriority } from '../types/task.types'
 
 interface TaskItemProps {
   task: Task
@@ -47,8 +50,54 @@ const formatRelativeTime = (date: Date): string => {
   return formatDate(date)
 }
 
+const formatDueDate = (dueDate: Date): string => {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const dueDateStart = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate())
+
+  if (dueDateStart.getTime() === today.getTime()) {
+    return 'Due today'
+  }
+
+  if (dueDateStart.getTime() === tomorrow.getTime()) {
+    return 'Due tomorrow'
+  }
+
+  if (dueDateStart.getTime() < today.getTime()) {
+    return 'Overdue'
+  }
+
+  return `Due ${formatDate(dueDate)}`
+}
+
+const getPriorityStyles = (priority: TaskPriority): string => {
+  switch (priority) {
+    case TaskPriority.LOW:
+      return 'text-blue-600 bg-blue-50'
+    case TaskPriority.MEDIUM:
+      return 'text-green-600 bg-green-50'
+    case TaskPriority.HIGH:
+      return 'text-orange-600 bg-orange-50'
+    case TaskPriority.CRITICAL:
+      return 'text-red-600 bg-red-50'
+    default:
+      return 'text-gray-600 bg-gray-50'
+  }
+}
+
+const isOverdue = (dueDate: Date | null, status: TaskStatus): boolean => {
+  if (!dueDate || status === TaskStatus.COMPLETED) {
+    return false
+  }
+  const now = new Date()
+  return dueDate.getTime() < now.getTime()
+}
+
 export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onToggleComplete }) => {
   const isCompleted = task.status === TaskStatus.COMPLETED
+  const taskIsOverdue = isOverdue(task.dueDate, task.status)
 
   return (
     <article
@@ -90,6 +139,39 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onTo
           <p className="mt-1 text-gray-600">
             {task.description || 'No description'}
           </p>
+
+          {/* Priority Badge and Due Date */}
+          {(task.priority || task.dueDate) && (
+            <div className="mt-2 flex items-center gap-2">
+              {/* Priority Badge */}
+              {task.priority && (
+                <span
+                  data-testid="priority-badge"
+                  aria-label={`Priority: ${task.priority}`}
+                  className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded ${getPriorityStyles(task.priority)}`}
+                >
+                  <svg
+                    className="w-3 h-3"
+                    aria-hidden="true"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L11 4.323V3a1 1 0 011-1zm-5 8.274l-.818 2.552c-.25.78.232 1.548 1.033 1.548.392 0 .756-.193.978-.536l.717-.947a.5.5 0 01.644-.153l2.735 1.67a.5.5 0 00.757-.378L12 9.75l-3-1.2-4 1.724z" />
+                  </svg>
+                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                </span>
+              )}
+
+              {/* Due Date Display */}
+              {task.dueDate && (
+                <span
+                  className={`text-xs ${taskIsOverdue ? 'text-red-600 font-semibold' : 'text-gray-600'}`}
+                >
+                  {formatDueDate(task.dueDate)}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Dates */}
           <div className="mt-2 text-sm text-gray-500 space-y-1">

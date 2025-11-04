@@ -34,8 +34,13 @@ enum TaskPriority {
 describe('User Story 2.3: Sort Tasks', () => {
   beforeEach(() => {
     // Reset store state before each test
-    const { tasks } = useTaskStore.getState()
-    tasks.forEach((task) => useTaskStore.getState().deleteTask(task.id))
+    useTaskStore.setState({
+      tasks: [],
+      currentFilter: 'all' as any,
+      sortBy: TaskSortBy.DATE_CREATED as any,
+      sortDirection: TaskSortDirection.DESC as any,
+      searchQuery: '',
+    })
 
     // Clear localStorage
     localStorage.clear()

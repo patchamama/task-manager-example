@@ -158,7 +158,7 @@ describe('User Story 2.1: Priority UI Components', () => {
       const prioritySelect = screen.getByLabelText(/priority/i)
       await user.selectOptions(prioritySelect, 'high')
 
-      const submitButton = screen.getByRole('button', { name: /save changes/i })
+      const submitButton = screen.getByRole('button', { name: /update task/i })
       await user.click(submitButton)
 
       expect(mockOnSubmit).toHaveBeenCalledWith(
@@ -188,7 +188,6 @@ describe('User Story 2.1: Priority UI Components', () => {
 
       render(
         <TaskItem
-          // @ts-expect-error - task prop doesn't support priority yet
           task={task}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
@@ -196,8 +195,9 @@ describe('User Story 2.1: Priority UI Components', () => {
         />
       )
 
-      const priorityBadge = screen.getByText(/low/i)
+      const priorityBadge = screen.getByTestId('priority-badge')
       expect(priorityBadge).toBeInTheDocument()
+      expect(priorityBadge).toHaveTextContent(/low/i)
     })
 
     it('should display priority badge for MEDIUM priority task', () => {
@@ -214,7 +214,6 @@ describe('User Story 2.1: Priority UI Components', () => {
 
       render(
         <TaskItem
-          // @ts-expect-error - task prop doesn't support priority yet
           task={task}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
@@ -222,8 +221,9 @@ describe('User Story 2.1: Priority UI Components', () => {
         />
       )
 
-      const priorityBadge = screen.getByText(/medium/i)
+      const priorityBadge = screen.getByTestId('priority-badge')
       expect(priorityBadge).toBeInTheDocument()
+      expect(priorityBadge).toHaveTextContent(/medium/i)
     })
 
     it('should display priority badge for HIGH priority task', () => {
@@ -240,7 +240,6 @@ describe('User Story 2.1: Priority UI Components', () => {
 
       render(
         <TaskItem
-          // @ts-expect-error - task prop doesn't support priority yet
           task={task}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
@@ -248,8 +247,9 @@ describe('User Story 2.1: Priority UI Components', () => {
         />
       )
 
-      const priorityBadge = screen.getByText(/high/i)
+      const priorityBadge = screen.getByTestId('priority-badge')
       expect(priorityBadge).toBeInTheDocument()
+      expect(priorityBadge).toHaveTextContent(/high/i)
     })
 
     it('should display priority badge for CRITICAL priority task', () => {
@@ -266,7 +266,6 @@ describe('User Story 2.1: Priority UI Components', () => {
 
       render(
         <TaskItem
-          // @ts-expect-error - task prop doesn't support priority yet
           task={task}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
@@ -274,8 +273,9 @@ describe('User Story 2.1: Priority UI Components', () => {
         />
       )
 
-      const priorityBadge = screen.getByText(/critical/i)
+      const priorityBadge = screen.getByTestId('priority-badge')
       expect(priorityBadge).toBeInTheDocument()
+      expect(priorityBadge).toHaveTextContent(/critical/i)
     })
 
     it('should apply color coding to LOW priority (text-blue-600 bg-blue-50)', () => {
@@ -292,7 +292,6 @@ describe('User Story 2.1: Priority UI Components', () => {
 
       render(
         <TaskItem
-          // @ts-expect-error - task prop doesn't support priority yet
           task={task}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
@@ -300,7 +299,7 @@ describe('User Story 2.1: Priority UI Components', () => {
         />
       )
 
-      const priorityBadge = screen.getByText(/low/i)
+      const priorityBadge = screen.getByTestId('priority-badge')
       expect(priorityBadge).toHaveClass('text-blue-600', 'bg-blue-50')
     })
 
@@ -318,7 +317,6 @@ describe('User Story 2.1: Priority UI Components', () => {
 
       render(
         <TaskItem
-          // @ts-expect-error - task prop doesn't support priority yet
           task={task}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
@@ -326,7 +324,7 @@ describe('User Story 2.1: Priority UI Components', () => {
         />
       )
 
-      const priorityBadge = screen.getByText(/medium/i)
+      const priorityBadge = screen.getByTestId('priority-badge')
       expect(priorityBadge).toHaveClass('text-green-600', 'bg-green-50')
     })
 
@@ -344,7 +342,6 @@ describe('User Story 2.1: Priority UI Components', () => {
 
       render(
         <TaskItem
-          // @ts-expect-error - task prop doesn't support priority yet
           task={task}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
@@ -352,7 +349,7 @@ describe('User Story 2.1: Priority UI Components', () => {
         />
       )
 
-      const priorityBadge = screen.getByText(/high/i)
+      const priorityBadge = screen.getByTestId('priority-badge')
       expect(priorityBadge).toHaveClass('text-orange-600', 'bg-orange-50')
     })
 
@@ -370,7 +367,6 @@ describe('User Story 2.1: Priority UI Components', () => {
 
       render(
         <TaskItem
-          // @ts-expect-error - task prop doesn't support priority yet
           task={task}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
@@ -378,7 +374,7 @@ describe('User Story 2.1: Priority UI Components', () => {
         />
       )
 
-      const priorityBadge = screen.getByText(/critical/i)
+      const priorityBadge = screen.getByTestId('priority-badge')
       expect(priorityBadge).toHaveClass('text-red-600', 'bg-red-50')
     })
 
@@ -396,7 +392,6 @@ describe('User Story 2.1: Priority UI Components', () => {
 
       render(
         <TaskItem
-          // @ts-expect-error - task prop doesn't support priority yet
           task={task}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
@@ -405,11 +400,11 @@ describe('User Story 2.1: Priority UI Components', () => {
       )
 
       // Check for icon element within priority badge
-      const priorityBadge = screen.getByText(/high/i).closest('[data-testid*="priority"]')
+      const priorityBadge = screen.getByTestId('priority-badge')
       expect(priorityBadge).toBeInTheDocument()
 
       // Icon should be present (using aria-hidden for decorative icon)
-      const icon = priorityBadge?.querySelector('[aria-hidden="true"]')
+      const icon = priorityBadge.querySelector('svg[aria-hidden="true"]')
       expect(icon).toBeInTheDocument()
     })
 

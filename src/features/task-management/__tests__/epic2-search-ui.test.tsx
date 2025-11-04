@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * Task Search UI Tests - EPIC 2
  * User Story 2.4: Search Tasks
@@ -8,11 +9,13 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { TaskList } from '../components/TaskList'
 import { TaskStatus, type Task } from '../types/task.types'
 
 describe('User Story 2.4: Search Tasks UI', () => {
+  const renderWithRouter = render
   const tasks: Task[] = [
     {
       id: '1',
@@ -63,21 +66,21 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
   describe('Search Input', () => {
     it('should render search input field', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       expect(searchInput).toBeInTheDocument()
     })
 
     it('should have placeholder text', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByPlaceholderText(/search tasks/i)
       expect(searchInput).toBeInTheDocument()
     })
 
     it('should have accessible label', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByLabelText(/search/i)
       expect(searchInput).toBeInTheDocument()
@@ -85,7 +88,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should allow typing in search input', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'groceries')
@@ -94,7 +97,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
     })
 
     it('should show search icon', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchIcon = screen.getByTestId('search-icon')
       expect(searchIcon).toBeInTheDocument()
@@ -104,7 +107,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
   describe('Search Functionality', () => {
     it('should filter tasks by title in real-time', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'groceries')
@@ -121,7 +124,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should filter tasks by description', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'testing')
@@ -136,7 +139,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should perform case-insensitive search', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'BUG')
@@ -151,7 +154,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should show all tasks when search is empty', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'test')
@@ -172,7 +175,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should find multiple matching tasks', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'e') // Common letter
@@ -189,7 +192,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
   describe('Debounced Search', () => {
     it('should debounce search input by 300ms', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'gro')
@@ -212,7 +215,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should reset debounce timer on each keystroke', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
 
@@ -241,7 +244,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should not trigger search before debounce completes', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'groceries')
@@ -260,7 +263,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
   describe('Clear Search Button', () => {
     it('should render clear button when search has value', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'test')
@@ -270,7 +273,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
     })
 
     it('should not render clear button when search is empty', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const clearButton = screen.queryByRole('button', { name: /clear search/i })
       expect(clearButton).not.toBeInTheDocument()
@@ -278,7 +281,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should clear search when clear button is clicked', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'groceries')
@@ -293,7 +296,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should show all tasks after clearing search', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'groceries')
@@ -317,7 +320,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should focus search input after clearing', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'test')
@@ -332,7 +335,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
   describe('No Results Message', () => {
     it('should show "no results" message when search returns no matches', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'nonexistent-task')
@@ -346,7 +349,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should show search term in no results message', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'xyz')
@@ -359,7 +362,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
     })
 
     it('should not show no results message when search is empty', () => {
-      render(<TaskList tasks={[]} />)
+      renderWithRouter(<TaskList tasks={[]} />)
 
       // Should show generic empty state, not search-specific
       expect(screen.queryByText(/no tasks found/i)).not.toBeInTheDocument()
@@ -370,7 +373,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
   describe('Search Result Count', () => {
     it('should display count of search results', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'a') // Common letter
@@ -385,7 +388,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should update count as search changes', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
 
@@ -409,7 +412,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
     })
 
     it('should not show count when no search is active', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       expect(screen.queryByText(/found.*task/i)).not.toBeInTheDocument()
     })
@@ -428,7 +431,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
         completedAt: new Date('2024-01-05'),
       }
 
-      render(<TaskList tasks={[...tasks, completedTask]} />)
+      renderWithRouter(<TaskList tasks={[...tasks, completedTask]} />)
 
       // Filter to active
       const activeButton = screen.getByRole('button', { name: /active/i })
@@ -451,7 +454,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
   describe('Accessibility', () => {
     it('should have proper ARIA attributes', () => {
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       expect(searchInput).toHaveAttribute('aria-label')
@@ -459,7 +462,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should announce search results to screen readers', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'groceries')
@@ -475,7 +478,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should be keyboard navigable', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       await user.tab()
       const searchInput = screen.getByRole('searchbox')
@@ -485,7 +488,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
 
     it('should support Escape key to clear search', async () => {
       const user = userEvent.setup({ delay: null })
-      render(<TaskList tasks={tasks} />)
+      renderWithRouter(<TaskList tasks={tasks} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'test')
@@ -501,7 +504,7 @@ describe('User Story 2.4: Search Tasks UI', () => {
       const searchSpy = vi.fn()
       const user = userEvent.setup({ delay: null })
 
-      render(<TaskList tasks={tasks} onSearch={searchSpy} />)
+      renderWithRouter(<TaskList tasks={tasks} onSearch={searchSpy} />)
 
       const searchInput = screen.getByRole('searchbox')
       await user.type(searchInput, 'groceries')

@@ -2,24 +2,45 @@
  * TaskList Component
  * EPIC 1: Task Management Core
  * EPIC 2: Task Organization
+ * EPIC 4.4: Drag and Drop Reorder
  *
  * User Story 1.2: View Task List
  * User Story 2.2: Filter Tasks by Status
  * User Story 2.3: Sort Tasks
  * User Story 2.4: Search Tasks
+ * User Story 4.4: Drag and Drop Reorder
  */
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
 import type { Task } from '../types/task.types'
 import { TaskFilter, TaskSortBy, TaskSortDirection } from '../types/task.types'
 import { TaskItem } from './TaskItem'
+import { SortableTaskItem } from './SortableTaskItem'
 
 interface TaskListProps {
   tasks: Task[]
   onEdit: (task: Task) => void
   onDelete: (id: string) => void
   onToggleComplete: (id: string) => void
+  onReorder?: (taskIds: string[]) => void
+  onMoveUp?: (taskId: string) => void
+  onMoveDown?: (taskId: string) => void
   isLoading?: boolean
 }
 
@@ -41,8 +62,19 @@ export const TaskList: React.FC<TaskListProps> = ({
   onEdit,
   onDelete,
   onToggleComplete,
+  onReorder,
+  onMoveUp,
+  onMoveDown,
   isLoading = false,
 }) => {
+  // Setup drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
   // Try to use router, but make it optional for testing
   let searchParams: URLSearchParams | null = null
   let setSearchParams: ((params: URLSearchParams) => void) | null = null
@@ -212,6 +244,24 @@ export const TaskList: React.FC<TaskListProps> = ({
   const searched = getSearchedTasks(filtered)
   const displayTasks = getSortedTasks(searched)
 
+  // Handle drag end
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over || !onReorder) return
+
+    if (active.id !== over.id) {
+      const oldIndex = displayTasks.findIndex((task) => task.id === active.id)
+      const newIndex = displayTasks.findIndex((task) => task.id === over.id)
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reorderedTasks = arrayMove(displayTasks, oldIndex, newIndex)
+        const taskIds = reorderedTasks.map((task) => task.id)
+        onReorder(taskIds)
+      }
+    }
+  }
+
   // Count for filters
   const allCount = tasks.length
   const activeCount = tasks.filter((t) => t.status === 'pending').length
@@ -362,6 +412,25 @@ export const TaskList: React.FC<TaskListProps> = ({
                 : 'Try adjusting your filters'}
           </p>
         </div>
+      ) : onReorder ? (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={displayTasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
+            <ul className="space-y-4" role="list">
+              {displayTasks.map((task) => (
+                <li key={task.id}>
+                  <SortableTaskItem
+                    task={task}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onToggleComplete={onToggleComplete}
+                    onMoveUp={onMoveUp}
+                    onMoveDown={onMoveDown}
+                  />
+                </li>
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
       ) : (
         <ul className="space-y-4" role="list">
           {displayTasks.map((task) => (

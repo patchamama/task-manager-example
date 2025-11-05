@@ -3,6 +3,7 @@
  * EPIC 1: Task Management Core
  * EPIC 2: Task Organization
  * EPIC 3: Categories & Tags
+ * EPIC 4.4: Drag and Drop Reorder
  */
 
 /**
@@ -87,7 +88,7 @@ export interface UpdateCategoryDto {
 
 /**
  * Core Task interface
- * User Stories: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.5, 3.2, 3.4
+ * User Stories: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.5, 3.2, 3.4, 4.4
  */
 export interface Task {
   id: string
@@ -101,6 +102,7 @@ export interface Task {
   completedAt: Date | null
   categoryId: string | null // User Story 3.2: Assign Category to Task
   tags: string[] // User Story 3.4: Add Tags to Tasks
+  customOrder: number // User Story 4.4: Drag and Drop Reorder
 }
 
 /**
@@ -219,4 +221,10 @@ export interface TaskState {
   setTagFilter: (tags: string[]) => void
   clearTagFilter: () => void
   getFilteredTasksByTag: () => Task[]
+
+  // EPIC 4.4 Drag and Drop Reorder Actions
+  reorderTasks: (taskIds: string[]) => void
+  moveTaskUp: (taskId: string) => void
+  moveTaskDown: (taskId: string) => void
+  moveTaskToPosition: (taskId: string, newPosition: number) => void
 }

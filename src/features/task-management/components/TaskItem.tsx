@@ -4,6 +4,7 @@
  * EPIC 2: Task Organization
  * EPIC 3: Categories & Tags
  * EPIC 4.2: Responsive Design
+ * EPIC 4.4: Drag and Drop Reorder (keyboard accessibility buttons)
  *
  * User Story 1.4: Delete Task
  * User Story 1.5: Mark Task Complete
@@ -12,6 +13,7 @@
  * User Story 3.2: Assign Category to Task (display category badge)
  * User Story 3.4: Add Tags to Tasks (display tags)
  * User Story 4.2: Mobile-optimized layout with touch-friendly buttons (44x44px min)
+ * User Story 4.4: Keyboard-accessible reorder buttons
  */
 
 import React from 'react'
@@ -25,6 +27,9 @@ interface TaskItemProps {
   onEdit: (task: Task) => void
   onDelete: (id: string) => void
   onToggleComplete: (id: string) => void
+  showReorderButtons?: boolean
+  onMoveUp?: (id: string) => void
+  onMoveDown?: (id: string) => void
 }
 
 const formatDate = (date: Date): string => {
@@ -102,7 +107,15 @@ const isOverdue = (dueDate: Date | null, status: TaskStatus): boolean => {
   return dueDate.getTime() < now.getTime()
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onToggleComplete }) => {
+export const TaskItem: React.FC<TaskItemProps> = ({
+  task,
+  onEdit,
+  onDelete,
+  onToggleComplete,
+  showReorderButtons = false,
+  onMoveUp,
+  onMoveDown,
+}) => {
   const isCompleted = task.status === TaskStatus.COMPLETED
   const taskIsOverdue = isOverdue(task.dueDate, task.status)
   const getCategoryById = useTaskStore((state) => state.getCategoryById)
@@ -215,6 +228,43 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit, onDelete, onTo
 
           {/* Action Buttons */}
           <div className="mt-3 flex flex-col sm:flex-row gap-2">
+            {/* Reorder Buttons (Keyboard Accessibility) */}
+            {showReorderButtons && onMoveUp && onMoveDown && (
+              <>
+                <button
+                  onClick={() => onMoveUp(task.id)}
+                  aria-label={`Move ${task.title} up`}
+                  className="flex items-center justify-center sm:justify-start gap-1 px-3 py-2 sm:py-1 min-h-[44px] sm:min-h-[auto] text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                  <span className="hidden sm:inline">Move Up</span>
+                </button>
+
+                <button
+                  onClick={() => onMoveDown(task.id)}
+                  aria-label={`Move ${task.title} down`}
+                  className="flex items-center justify-center sm:justify-start gap-1 px-3 py-2 sm:py-1 min-h-[44px] sm:min-h-[auto] text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  <span className="hidden sm:inline">Move Down</span>
+                </button>
+              </>
+            )}
+
             <button
               onClick={() => onEdit(task)}
               aria-label={`Edit ${task.title}`}

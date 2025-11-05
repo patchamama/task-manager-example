@@ -3,6 +3,7 @@
  * EPIC 1: Task Management Core
  * EPIC 2: Task Organization
  * EPIC 3: Categories & Tags
+ * EPIC 4.4: Drag and Drop Reorder
  * EPIC 5.1: LocalStorage Persistence
  *
  * Zustand store for task state management with localStorage persistence
@@ -151,6 +152,7 @@ export const useTaskStore = create<TaskState>()(
     }
 
     const now = new Date()
+    const currentTasks = get().tasks
     const newTask: Task = {
       id: generateId(),
       title: dto.title,
@@ -160,6 +162,7 @@ export const useTaskStore = create<TaskState>()(
       dueDate: dto.dueDate || null,
       categoryId: dto.categoryId || null, // EPIC 3: Support category on creation
       tags: dto.tags || [], // EPIC 3: Support tags on creation
+      customOrder: currentTasks.length, // EPIC 4.4: Set order based on current count
       createdAt: now,
       updatedAt: now,
       completedAt: null,
@@ -1052,6 +1055,93 @@ export const useTaskStore = create<TaskState>()(
     })
   },
 
+  // EPIC 4.4: Drag and Drop Reorder Actions
+  reorderTasks: (taskIds: string[]) => {
+    const tasks = get().tasks
+    const now = new Date()
+
+    // Create a map of task IDs to their new order
+    const orderMap = new Map(taskIds.map((id, index) => [id, index]))
+
+    // Update tasks with new customOrder values
+    const updatedTasks = tasks.map((task) => {
+      if (orderMap.has(task.id)) {
+        return {
+          ...task,
+          customOrder: orderMap.get(task.id)!,
+          updatedAt: new Date(now.getTime() + 1), // Ensure timestamp difference
+        }
+      }
+      return task
+    })
+
+    // Sort by new customOrder
+    updatedTasks.sort((a, b) => a.customOrder - b.customOrder)
+
+    set({ tasks: updatedTasks })
+  },
+
+  moveTaskUp: (taskId: string) => {
+    const tasks = get().tasks.slice().sort((a, b) => a.customOrder - b.customOrder)
+    const currentIndex = tasks.findIndex((t) => t.id === taskId)
+
+    if (currentIndex <= 0) {
+      // Already at the top or not found
+      return
+    }
+
+    // Swap with previous task
+    const newTaskIds = tasks.map((t) => t.id)
+    ;[newTaskIds[currentIndex - 1], newTaskIds[currentIndex]] = [newTaskIds[currentIndex], newTaskIds[currentIndex - 1]]
+
+    get().reorderTasks(newTaskIds)
+  },
+
+  moveTaskDown: (taskId: string) => {
+    const tasks = get().tasks.slice().sort((a, b) => a.customOrder - b.customOrder)
+    const currentIndex = tasks.findIndex((t) => t.id === taskId)
+
+    if (currentIndex === -1 || currentIndex >= tasks.length - 1) {
+      // Not found or already at the bottom
+      return
+    }
+
+    // Swap with next task
+    const newTaskIds = tasks.map((t) => t.id)
+    ;[newTaskIds[currentIndex], newTaskIds[currentIndex + 1]] = [newTaskIds[currentIndex + 1], newTaskIds[currentIndex]]
+
+    get().reorderTasks(newTaskIds)
+  },
+
+  moveTaskToPosition: (taskId: string, newPosition: number) => {
+    const tasks = get().tasks.slice().sort((a, b) => a.customOrder - b.customOrder)
+    const currentIndex = tasks.findIndex((t) => t.id === taskId)
+
+    if (currentIndex === -1) {
+      // Task not found
+      return
+    }
+
+    if (newPosition < 0 || newPosition >= tasks.length) {
+      // Invalid position
+      return
+    }
+
+    if (currentIndex === newPosition) {
+      // Already at the desired position
+      return
+    }
+
+    // Remove task from current position
+    const taskIds = tasks.map((t) => t.id)
+    const [movedTaskId] = taskIds.splice(currentIndex, 1)
+
+    // Insert at new position
+    taskIds.splice(newPosition, 0, movedTaskId)
+
+    get().reorderTasks(taskIds)
+  },
+
   // Test utility: Reset store to initial state
   resetStore: () => {
     set(initialState)
@@ -1092,6 +1182,7 @@ export const useTaskStore = create<TaskState>()(
       updatedAt: new Date(task.updatedAt),
       completedAt: task.completedAt ? new Date(task.completedAt) : null,
       dueDate: task.dueDate ? new Date(task.dueDate) : null,
+      customOrder: task.customOrder ?? 0, // EPIC 4.4: Ensure customOrder exists
     }))
 
     const categories = (persisted.categories || []).map((category: any) => ({

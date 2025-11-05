@@ -4,8 +4,9 @@
  * EPIC 4.1: Dark Mode
  * EPIC 4.2: Responsive Design
  * EPIC 4.3: Keyboard Shortcuts
+ * EPIC 4.4: Drag and Drop Reorder
  *
- * Main page integrating all task management features with mobile-first responsive layout and keyboard shortcuts
+ * Main page integrating all task management features with mobile-first responsive layout, keyboard shortcuts, and drag-and-drop reordering
  */
 
 import React, { useState, useEffect } from 'react'
@@ -19,7 +20,7 @@ import { useKeyboardShortcuts } from '../../../shared/hooks'
 import type { Task, CreateTaskDto } from '../types/task.types'
 
 export const TaskManagementPage: React.FC = () => {
-  const { tasks, addTask, updateTask, deleteTask, toggleTaskComplete, getCompletedCount } = useTaskStore()
+  const { tasks, addTask, updateTask, deleteTask, toggleTaskComplete, getCompletedCount, reorderTasks, moveTaskUp, moveTaskDown } = useTaskStore()
 
   const [showForm, setShowForm] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
@@ -173,6 +174,9 @@ export const TaskManagementPage: React.FC = () => {
         onEdit={handleEditTask}
         onDelete={handleDeleteTask}
         onToggleComplete={handleToggleComplete}
+        onReorder={reorderTasks}
+        onMoveUp={moveTaskUp}
+        onMoveDown={moveTaskDown}
       />
 
       {/* Delete Confirmation Modal */}

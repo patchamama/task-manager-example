@@ -1244,16 +1244,59 @@ export const useTaskStore = create<TaskState>()(
     }))
   },
 
-  // Test utility: Reset store to initial state
+  // Test utility: Reset store and reload from localStorage
   resetStore: () => {
+    // Get persisted state from localStorage
+    try {
+      const stored = customStorage.getItem('task-storage')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed && parsed.state) {
+          // Use the merge function logic to reconstruct the state
+          const persisted = parsed.state as Partial<TaskState>
+
+          const tasks = (persisted.tasks || []).map((task: any) => ({
+            ...task,
+            createdAt: new Date(task.createdAt),
+            updatedAt: new Date(task.updatedAt),
+            completedAt: task.completedAt ? new Date(task.completedAt) : null,
+            dueDate: task.dueDate ? new Date(task.dueDate) : null,
+            customOrder: task.customOrder ?? 0,
+            tags: task.tags || [],
+            categoryId: task.categoryId || null,
+          }))
+
+          const categories = (persisted.categories || []).map((category: any) => ({
+            ...category,
+            createdAt: new Date(category.createdAt),
+            updatedAt: new Date(category.updatedAt),
+          }))
+
+          set({
+            ...initialState,
+            ...persisted,
+            tasks,
+            categories,
+            selectedTaskIds: [],
+            searchQuery: '',
+          })
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Error loading from localStorage:', error)
+    }
+
+    // Fallback to initial state if no persisted data or error
     set(initialState)
   },
 }),
 {
-  name: 'task-store',
+  name: 'task-storage',
   storage: createJSONStorage(() => customStorage),
   version: 0,
   // Custom deserialization to handle Date objects
+  // EPIC 5.1: Partialize state - exclude transient state (selectedTaskIds, searchQuery)
   partialize: (state) => ({
     tasks: state.tasks,
     categories: state.categories,
@@ -1262,7 +1305,7 @@ export const useTaskStore = create<TaskState>()(
     tagFilters: state.tagFilters,
     sortBy: state.sortBy,
     sortDirection: state.sortDirection,
-    searchQuery: state.searchQuery,
+    // DO NOT persist: selectedTaskIds, searchQuery
   }),
   // Handle corrupted data gracefully
   onRehydrateStorage: () => (state, error) => {
@@ -1271,7 +1314,7 @@ export const useTaskStore = create<TaskState>()(
       // Don't throw - use initial state instead
     }
   },
-  // Deserialize dates from ISO strings
+  // EPIC 5.1: Deserialize dates from ISO strings and ensure defaults
   merge: (persistedState, currentState) => {
     if (!persistedState) return currentState
 
@@ -1285,6 +1328,8 @@ export const useTaskStore = create<TaskState>()(
       completedAt: task.completedAt ? new Date(task.completedAt) : null,
       dueDate: task.dueDate ? new Date(task.dueDate) : null,
       customOrder: task.customOrder ?? 0, // EPIC 4.4: Ensure customOrder exists
+      tags: task.tags || [], // EPIC 3: Ensure tags array exists
+      categoryId: task.categoryId || null, // EPIC 3: Ensure categoryId exists
     }))
 
     const categories = (persisted.categories || []).map((category: any) => ({
@@ -1298,6 +1343,9 @@ export const useTaskStore = create<TaskState>()(
       ...persisted,
       tasks,
       categories,
+      // Ensure transient state is reset to defaults
+      selectedTaskIds: [], // EPIC 4.5: Always start with empty selection
+      searchQuery: '', // EPIC 2: Always start with empty search
     }
   },
 }

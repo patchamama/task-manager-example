@@ -3,8 +3,9 @@
  * EPIC 1: Task Management Core
  * EPIC 4.1: Dark Mode
  * EPIC 4.2: Responsive Design
+ * EPIC 4.3: Keyboard Shortcuts
  *
- * Main page integrating all task management features with mobile-first responsive layout
+ * Main page integrating all task management features with mobile-first responsive layout and keyboard shortcuts
  */
 
 import React, { useState, useEffect } from 'react'
@@ -12,7 +13,9 @@ import { useTaskStore } from '../store/task.store'
 import { TaskForm } from '../components/TaskForm'
 import { TaskList } from '../components/TaskList'
 import { ConfirmationModal } from '../../../shared/components/ConfirmationModal'
+import { KeyboardShortcutsModal } from '../../../shared/components/KeyboardShortcutsModal'
 import { ThemeToggle } from '../../../shared/theme'
+import { useKeyboardShortcuts } from '../../../shared/hooks'
 import type { Task, CreateTaskDto } from '../types/task.types'
 
 export const TaskManagementPage: React.FC = () => {
@@ -21,20 +24,42 @@ export const TaskManagementPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false)
 
   const completedCount = getCompletedCount()
 
-  // Handle Escape key to close form
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && (showForm || editingTask)) {
+  // Register keyboard shortcuts
+  useKeyboardShortcuts({
+    'ctrl+n': (e) => {
+      e.preventDefault()
+      if (!showForm && !editingTask) {
+        handleCreateTask()
+      }
+    },
+    'cmd+n': (e) => {
+      e.preventDefault()
+      if (!showForm && !editingTask) {
+        handleCreateTask()
+      }
+    },
+    'ctrl+k': (e) => {
+      e.preventDefault()
+      setShowShortcutsHelp(true)
+    },
+    'cmd+k': (e) => {
+      e.preventDefault()
+      setShowShortcutsHelp(true)
+    },
+    'escape': () => {
+      if (showShortcutsHelp) {
+        setShowShortcutsHelp(false)
+      } else if (taskToDelete) {
+        handleCancelDelete()
+      } else if (showForm || editingTask) {
         handleCancelForm()
       }
-    }
-
-    document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
-  }, [showForm, editingTask])
+    },
+  })
 
   const handleCreateTask = () => {
     setShowForm(true)
@@ -87,6 +112,26 @@ export const TaskManagementPage: React.FC = () => {
         <div className="flex items-center justify-between mb-4 gap-3">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">Task Manager</h1>
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <button
+              onClick={() => setShowShortcutsHelp(true)}
+              aria-label="Show keyboard shortcuts"
+              title="Keyboard shortcuts (Ctrl+K)"
+              className="p-2 min-h-[44px] min-w-[44px] sm:min-h-[auto] sm:min-w-[auto] flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            >
+              <svg
+                className="w-5 h-5 text-gray-700 dark:text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </button>
             <ThemeToggle />
             <button
               onClick={handleCreateTask}
@@ -141,6 +186,9 @@ export const TaskManagementPage: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <KeyboardShortcutsModal isOpen={showShortcutsHelp} onClose={() => setShowShortcutsHelp(false)} />
     </div>
   )
 }

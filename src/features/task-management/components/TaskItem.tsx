@@ -5,6 +5,7 @@
  * EPIC 3: Categories & Tags
  * EPIC 4.2: Responsive Design
  * EPIC 4.4: Drag and Drop Reorder (keyboard accessibility buttons)
+ * EPIC 4.5: Bulk Actions (selection checkbox)
  *
  * User Story 1.4: Delete Task
  * User Story 1.5: Mark Task Complete
@@ -14,6 +15,7 @@
  * User Story 3.4: Add Tags to Tasks (display tags)
  * User Story 4.2: Mobile-optimized layout with touch-friendly buttons (44x44px min)
  * User Story 4.4: Keyboard-accessible reorder buttons
+ * User Story 4.5: Bulk selection checkbox
  */
 
 import React from 'react'
@@ -30,6 +32,9 @@ interface TaskItemProps {
   showReorderButtons?: boolean
   onMoveUp?: (id: string) => void
   onMoveDown?: (id: string) => void
+  isSelected?: boolean
+  onToggleSelection?: (id: string) => void
+  selectionMode?: boolean
 }
 
 const formatDate = (date: Date): string => {
@@ -115,6 +120,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   showReorderButtons = false,
   onMoveUp,
   onMoveDown,
+  isSelected = false,
+  onToggleSelection,
+  selectionMode = false,
 }) => {
   const isCompleted = task.status === TaskStatus.COMPLETED
   const taskIsOverdue = isOverdue(task.dueDate, task.status)
@@ -124,10 +132,21 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   return (
     <article
       aria-label={`Task: ${task.title}`}
-      className={`p-3 sm:p-4 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg transition-colors ${isCompleted ? 'opacity-60' : ''}`}
+      className={`p-3 sm:p-4 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg transition-colors ${isCompleted ? 'opacity-60' : ''} ${isSelected ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
     >
       <div className="flex items-start gap-3 sm:gap-4">
-        {/* Checkbox */}
+        {/* Selection Checkbox (EPIC 4.5) */}
+        {selectionMode && onToggleSelection && (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onToggleSelection(task.id)}
+            aria-label={`Select ${task.title}`}
+            className="mt-1 h-5 w-5 sm:h-6 sm:w-6 min-h-[20px] min-w-[20px] cursor-pointer focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+          />
+        )}
+
+        {/* Completion Checkbox */}
         <input
           type="checkbox"
           checked={isCompleted}

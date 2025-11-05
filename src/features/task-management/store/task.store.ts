@@ -88,6 +88,7 @@ const initialState = {
   sortBy: TaskSortBy.DATE_CREATED,
   sortDirection: TaskSortDirection.DESC,
   searchQuery: '',
+  selectedTaskIds: [], // EPIC 4.5: Bulk Actions
 }
 
 /**
@@ -200,6 +201,7 @@ export const useTaskStore = create<TaskState>()(
   deleteTask: (id: string) => {
     set((state) => ({
       tasks: state.tasks.filter((t) => t.id !== id),
+      selectedTaskIds: state.selectedTaskIds.filter((selectedId) => selectedId !== id), // EPIC 4.5: Remove from selection
     }))
   },
 
@@ -1140,6 +1142,106 @@ export const useTaskStore = create<TaskState>()(
     taskIds.splice(newPosition, 0, movedTaskId)
 
     get().reorderTasks(taskIds)
+  },
+
+  // EPIC 4.5: Bulk Actions
+  selectTask: (taskId: string) => {
+    set((state) => ({
+      selectedTaskIds: [...state.selectedTaskIds, taskId],
+    }))
+  },
+
+  deselectTask: (taskId: string) => {
+    set((state) => ({
+      selectedTaskIds: state.selectedTaskIds.filter((id) => id !== taskId),
+    }))
+  },
+
+  toggleTaskSelection: (taskId: string) => {
+    const state = get()
+    if (state.selectedTaskIds.includes(taskId)) {
+      state.deselectTask(taskId)
+    } else {
+      state.selectTask(taskId)
+    }
+  },
+
+  selectAllTasks: (taskIds: string[]) => {
+    set({ selectedTaskIds: taskIds })
+  },
+
+  clearSelection: () => {
+    set({ selectedTaskIds: [] })
+  },
+
+  getSelectionCount: () => {
+    return get().selectedTaskIds.length
+  },
+
+  areAllTasksSelected: (taskIds: string[]) => {
+    const state = get()
+    if (taskIds.length === 0) return false
+    return taskIds.every((id) => state.selectedTaskIds.includes(id))
+  },
+
+  getSelectedTasks: () => {
+    const state = get()
+    return state.tasks.filter((task) => state.selectedTaskIds.includes(task.id))
+  },
+
+  bulkCompleteTask: (taskIds: string[]) => {
+    if (taskIds.length === 0) return
+
+    const now = new Date()
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        taskIds.includes(task.id)
+          ? {
+              ...task,
+              status: TaskStatus.COMPLETED,
+              completedAt: now,
+              updatedAt: new Date(now.getTime() + 1),
+            }
+          : task
+      ),
+      selectedTaskIds: [], // Clear selection after bulk operation
+    }))
+  },
+
+  bulkDeleteTasks: (taskIds: string[]) => {
+    if (taskIds.length === 0) return
+
+    set((state) => ({
+      tasks: state.tasks.filter((task) => !taskIds.includes(task.id)),
+      selectedTaskIds: [], // Clear selection after bulk operation
+    }))
+  },
+
+  bulkChangeCategory: (taskIds: string[], categoryId: string | null) => {
+    if (taskIds.length === 0) return
+
+    // Validate category if provided
+    if (categoryId) {
+      const category = get().getCategoryById(categoryId)
+      if (!category) {
+        // Invalid category, don't change anything
+        return
+      }
+    }
+
+    const now = new Date()
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        taskIds.includes(task.id)
+          ? {
+              ...task,
+              categoryId,
+              updatedAt: new Date(now.getTime() + 1),
+            }
+          : task
+      ),
+      selectedTaskIds: [], // Clear selection after bulk operation
+    }))
   },
 
   // Test utility: Reset store to initial state

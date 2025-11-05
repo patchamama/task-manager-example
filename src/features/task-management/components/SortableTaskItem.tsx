@@ -1,6 +1,7 @@
 /**
  * SortableTaskItem Component
  * EPIC 4.4: Drag and Drop Reorder
+ * EPIC 4.5: Bulk Actions (pass through selection props)
  *
  * Wrapper around TaskItem to make it draggable and sortable
  */
@@ -18,6 +19,9 @@ interface SortableTaskItemProps {
   onToggleComplete: (id: string) => void
   onMoveUp?: (id: string) => void
   onMoveDown?: (id: string) => void
+  isSelected?: boolean
+  onToggleSelection?: (id: string) => void
+  selectionMode?: boolean
 }
 
 export const SortableTaskItem: React.FC<SortableTaskItemProps> = ({
@@ -27,6 +31,9 @@ export const SortableTaskItem: React.FC<SortableTaskItemProps> = ({
   onToggleComplete,
   onMoveUp,
   onMoveDown,
+  isSelected,
+  onToggleSelection,
+  selectionMode,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
 
@@ -46,6 +53,9 @@ export const SortableTaskItem: React.FC<SortableTaskItemProps> = ({
         showReorderButtons={true}
         onMoveUp={onMoveUp}
         onMoveDown={onMoveDown}
+        isSelected={isSelected}
+        onToggleSelection={onToggleSelection}
+        selectionMode={selectionMode}
       />
     </div>
   )

@@ -3,16 +3,19 @@
  * EPIC 1: Task Management Core
  * EPIC 2: Task Organization
  * EPIC 4.4: Drag and Drop Reorder
+ * EPIC 4.5: Bulk Actions
  *
  * User Story 1.2: View Task List
  * User Story 2.2: Filter Tasks by Status
  * User Story 2.3: Sort Tasks
  * User Story 2.4: Search Tasks
  * User Story 4.4: Drag and Drop Reorder
+ * User Story 4.5: Bulk Actions integration
  */
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useTaskStore } from '../store/task.store'
 import {
   DndContext,
   closestCenter,
@@ -32,6 +35,7 @@ import type { Task } from '../types/task.types'
 import { TaskFilter, TaskSortBy, TaskSortDirection } from '../types/task.types'
 import { TaskItem } from './TaskItem'
 import { SortableTaskItem } from './SortableTaskItem'
+import { BulkActionToolbar } from './BulkActionToolbar'
 
 interface TaskListProps {
   tasks: Task[]
@@ -120,6 +124,10 @@ export const TaskList: React.FC<TaskListProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [debouncedSearch, setDebouncedSearch] = useState<string>('')
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [selectionMode, setSelectionMode] = useState<boolean>(false)
+
+  // EPIC 4.5: Bulk Actions - Get selection state from store
+  const { selectedTaskIds, toggleTaskSelection } = useTaskStore()
 
   // Sync filter with URL (only once on mount)
   useEffect(() => {
@@ -292,6 +300,13 @@ export const TaskList: React.FC<TaskListProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* EPIC 4.5: Bulk Action Toolbar */}
+      <BulkActionToolbar
+        onEnterSelectionMode={() => setSelectionMode(true)}
+        onExitSelectionMode={() => setSelectionMode(false)}
+        selectionMode={selectionMode}
+      />
+
       {/* Filter Controls */}
       <div className="flex items-center gap-2" role="group" aria-label="Filter tasks">
         <button
@@ -425,6 +440,9 @@ export const TaskList: React.FC<TaskListProps> = ({
                     onToggleComplete={onToggleComplete}
                     onMoveUp={onMoveUp}
                     onMoveDown={onMoveDown}
+                    isSelected={selectedTaskIds.includes(task.id)}
+                    onToggleSelection={toggleTaskSelection}
+                    selectionMode={selectionMode}
                   />
                 </li>
               ))}
@@ -435,7 +453,15 @@ export const TaskList: React.FC<TaskListProps> = ({
         <ul className="space-y-4" role="list">
           {displayTasks.map((task) => (
             <li key={task.id}>
-              <TaskItem task={task} onEdit={onEdit} onDelete={onDelete} onToggleComplete={onToggleComplete} />
+              <TaskItem
+                task={task}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onToggleComplete={onToggleComplete}
+                isSelected={selectedTaskIds.includes(task.id)}
+                onToggleSelection={toggleTaskSelection}
+                selectionMode={selectionMode}
+              />
             </li>
           ))}
         </ul>

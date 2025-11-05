@@ -4,6 +4,7 @@
  * EPIC 2: Task Organization
  * EPIC 3: Categories & Tags
  * EPIC 4.4: Drag and Drop Reorder
+ * EPIC 4.5: Bulk Actions
  */
 
 /**
@@ -144,6 +145,7 @@ export interface TaskState {
   sortBy: TaskSortBy
   sortDirection: TaskSortDirection
   searchQuery: string
+  selectedTaskIds: string[] // EPIC 4.5: Bulk Actions selection state
 
   // EPIC 1 Actions
   addTask: (dto: CreateTaskDto) => void
@@ -227,4 +229,17 @@ export interface TaskState {
   moveTaskUp: (taskId: string) => void
   moveTaskDown: (taskId: string) => void
   moveTaskToPosition: (taskId: string, newPosition: number) => void
+
+  // EPIC 4.5 Bulk Actions
+  selectTask: (taskId: string) => void
+  deselectTask: (taskId: string) => void
+  toggleTaskSelection: (taskId: string) => void
+  selectAllTasks: (taskIds: string[]) => void
+  clearSelection: () => void
+  getSelectionCount: () => number
+  areAllTasksSelected: (taskIds: string[]) => boolean
+  getSelectedTasks: () => Task[]
+  bulkCompleteTask: (taskIds: string[]) => void
+  bulkDeleteTasks: (taskIds: string[]) => void
+  bulkChangeCategory: (taskIds: string[], categoryId: string | null) => void
 }

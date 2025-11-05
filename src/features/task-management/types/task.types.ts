@@ -242,4 +242,14 @@ export interface TaskState {
   bulkCompleteTask: (taskIds: string[]) => void
   bulkDeleteTasks: (taskIds: string[]) => void
   bulkChangeCategory: (taskIds: string[], categoryId: string | null) => void
+
+  // EPIC 5.2 Export Tasks
+  exportTasksJSON: () => string
+  exportTasksCSV: () => string
+  exportFilteredTasksJSON: (filter: TaskFilter) => string
+  exportFilteredTasksCSV: (filter: TaskFilter) => string
+  getExportFilename: (format: 'json' | 'csv') => string
+
+  // Utility
+  resetStore: () => void
 }

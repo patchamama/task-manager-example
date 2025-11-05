@@ -4,9 +4,11 @@
  * EPIC 2: Task Organization
  * EPIC 3: Categories & Tags
  * EPIC 4.4: Drag and Drop Reorder
+ * EPIC 4.5: Bulk Actions
  * EPIC 5.1: LocalStorage Persistence
+ * EPIC 5.2: Export Tasks
  *
- * Zustand store for task state management with localStorage persistence
+ * Zustand store for task state management with localStorage persistence and export functionality
  */
 
 import { create } from 'zustand'
@@ -1242,6 +1244,131 @@ export const useTaskStore = create<TaskState>()(
       ),
       selectedTaskIds: [], // Clear selection after bulk operation
     }))
+  },
+
+  // EPIC 5.2: Export Tasks
+  exportTasksJSON: () => {
+    const state = get()
+    const exportData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      taskCount: state.tasks.length,
+      categoryCount: state.categories.length,
+      tasks: state.tasks,
+      categories: state.categories,
+    }
+    return JSON.stringify(exportData, null, 2)
+  },
+
+  exportTasksCSV: () => {
+    const state = get()
+    const headers = ['Title', 'Description', 'Status', 'Priority', 'Due Date', 'Category', 'Tags', 'Created At', 'Completed At']
+
+    const escapeCSV = (value: string): string => {
+      if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+        return `"${value.replace(/"/g, '""')}"`
+      }
+      return value
+    }
+
+    const rows = state.tasks.map((task) => {
+      const category = task.categoryId ? state.getCategoryById(task.categoryId) : null
+      const dueDate = task.dueDate ? task.dueDate.toISOString().split('T')[0] : ''
+      const tags = task.tags.join('; ')
+      const createdAt = task.createdAt.toISOString().split('T')[0]
+      const completedAt = task.completedAt ? task.completedAt.toISOString().split('T')[0] : ''
+
+      return [
+        escapeCSV(task.title),
+        escapeCSV(task.description),
+        task.status,
+        task.priority,
+        dueDate,
+        category ? escapeCSV(category.name) : '',
+        escapeCSV(tags),
+        createdAt,
+        completedAt,
+      ].join(',')
+    })
+
+    return [headers.join(','), ...rows].join('\n')
+  },
+
+  exportFilteredTasksJSON: (filter: TaskFilter) => {
+    const state = get()
+    let filteredTasks: Task[] = []
+
+    if (filter === TaskFilter.ALL) {
+      filteredTasks = state.tasks
+    } else if (filter === TaskFilter.ACTIVE) {
+      filteredTasks = state.tasks.filter((t) => t.status === TaskStatus.PENDING)
+    } else if (filter === TaskFilter.COMPLETED) {
+      filteredTasks = state.tasks.filter((t) => t.status === TaskStatus.COMPLETED)
+    }
+
+    const exportData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      filter,
+      totalTasks: state.tasks.length,
+      filteredTasks: filteredTasks.length,
+      taskCount: filteredTasks.length,
+      categoryCount: state.categories.length,
+      tasks: filteredTasks,
+      categories: state.categories,
+    }
+    return JSON.stringify(exportData, null, 2)
+  },
+
+  exportFilteredTasksCSV: (filter: TaskFilter) => {
+    const state = get()
+    let filteredTasks: Task[] = []
+
+    if (filter === TaskFilter.ALL) {
+      filteredTasks = state.tasks
+    } else if (filter === TaskFilter.ACTIVE) {
+      filteredTasks = state.tasks.filter((t) => t.status === TaskStatus.PENDING)
+    } else if (filter === TaskFilter.COMPLETED) {
+      filteredTasks = state.tasks.filter((t) => t.status === TaskStatus.COMPLETED)
+    }
+
+    const headers = ['Title', 'Description', 'Status', 'Priority', 'Due Date', 'Category', 'Tags', 'Created At', 'Completed At']
+
+    const escapeCSV = (value: string): string => {
+      if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+        return `"${value.replace(/"/g, '""')}"`
+      }
+      return value
+    }
+
+    const rows = filteredTasks.map((task) => {
+      const category = task.categoryId ? state.getCategoryById(task.categoryId) : null
+      const dueDate = task.dueDate ? task.dueDate.toISOString().split('T')[0] : ''
+      const tags = task.tags.join('; ')
+      const createdAt = task.createdAt.toISOString().split('T')[0]
+      const completedAt = task.completedAt ? task.completedAt.toISOString().split('T')[0] : ''
+
+      return [
+        escapeCSV(task.title),
+        escapeCSV(task.description),
+        task.status,
+        task.priority,
+        dueDate,
+        category ? escapeCSV(category.name) : '',
+        escapeCSV(tags),
+        createdAt,
+        completedAt,
+      ].join(',')
+    })
+
+    return [headers.join(','), ...rows].join('\n')
+  },
+
+  getExportFilename: (format: 'json' | 'csv') => {
+    const state = get()
+    const today = new Date().toISOString().split('T')[0]
+    const taskCount = state.tasks.length
+    return `tasks-${taskCount}-tasks-${today}.${format}`
   },
 
   // Test utility: Reset store and reload from localStorage
